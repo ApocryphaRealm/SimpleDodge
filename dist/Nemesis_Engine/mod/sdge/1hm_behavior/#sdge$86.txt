@@ -2,8 +2,8 @@
 			<hkparam name="variableBindingSet">#sdge$85</hkparam>
 			<hkparam name="userData">0</hkparam>
 			<hkparam name="name">SimpleDodgeBackLeft_ManualSelectorGenerator</hkparam>
-			<hkparam name="generators" numelements="4">
-				#sdge$27 #sdge$27 #sdge$84 #sdge$84
+			<hkparam name="generators" numelements="6">
+				#sdge$27 #sdge$27 #sdge$84 #sdge$84 #sdge$99 #sdge$99
 			</hkparam>
 			<hkparam name="selectedGeneratorIndex">0</hkparam>
 			<hkparam name="currentGeneratorIndex">0</hkparam>

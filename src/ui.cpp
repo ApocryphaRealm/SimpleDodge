@@ -232,6 +232,8 @@ namespace Menu
 
 		ImGuiMCP::SeparatorText(strings::TR("SDG_SecDodge", "Dodging"));
 		Switch("SDG_StepDodge", "Step dodge instead of roll", S::step_dodge, "SDG_HelpStepDodge", "Short sidesteps instead of rolls.");
+		Switch("SDG_LongRoll", "Long roll", S::long_roll, "SDG_HelpLongRoll",
+			"Rolls travel half as far again as a step dodge. Off: a roll goes as far as the step. Needs Nemesis or Pandora run again.");
 		Switch("SDG_InPlace", "Dodge while standing still", S::enable_dodge_in_place, "SDG_HelpInPlace", "Dodging with no direction held uses the default direction below.");
 		{
 			int current = 0;
@@ -256,6 +258,8 @@ namespace Menu
 		ImGuiMCP::SeparatorText(strings::TR("SDG_SecKeys", "Keys"));
 		DrawDodgeKeyRow();
 		Switch("SDG_DoubleTap", "Double-tap to dodge", S::use_double_tap, "SDG_HelpDoubleTap", "Dodge only when the dodge, sprint or sneak key is pressed twice quickly.");
+		Switch("SDG_DirTap", "Double-tap a direction to dodge", S::directional_double_tap, "SDG_HelpDirTap",
+			"Tap a movement key, or flick the left stick, twice quickly to dodge that way. Holding a direction never dodges.");
 		Switch("SDG_SprintKey", "Dodge with a tap of Sprint", S::use_sprint_key, "SDG_HelpSprintKey", "A quick tap of the sprint key dodges; holding it sprints.");
 		Slider("SDG_SprintTap", "Sprint tap length", S::sprinting_press_duration, 0.05F, 2.0F, "%.2f s", 0.05F, "SDG_HelpSprintTap", "A sprint press shorter than this dodges.");
 		Switch("SDG_SneakKey", "Dodge with a tap of Sneak", S::enable_sneak_key_dodge, "SDG_HelpSneakKey", "A quick tap of the sneak key dodges; holding it sneaks.");

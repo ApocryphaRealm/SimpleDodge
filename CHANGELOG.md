@@ -1,5 +1,17 @@
 # Changelog - Simple Dodge
 
+## 1.1.0 - 2026-11-12 - untested
+
+### Fixed
+- Nemesis no longer stops with a critical error (Missing info in info.ini, Mod: sdge) when Simple Dodge is installed: the behaviour patch's info.ini now names its Nexus page (site=), which Nemesis requires. Pandora was never affected.
+- Forty-two settings-page labels and help texts were English in every language; all eleven languages now carry them.
+- A dodge key that is also the sprint or sneak key no longer counts one tap twice.
+- With double-tap on, holding the sprint key (or a dodge key that is also the sprint key) no longer dodges. A double tap is now two short taps, each released within the tap length, the second within 0.3 s of the first; a held key never counts, whatever other sprint mods re-send while it is held.
+
+### Added
+- Double-tap a direction to dodge (off by default): tap a movement key, or flick the left stick, twice quickly to dodge that way.
+- Long roll (on by default): rolls travel half as far again as a step dodge (step dodge off). Rolls used to share the step's motion, so they went no further. Needs Nemesis or Pandora run again; without that the standard roll plays.
+
 ## 1.0.0 - first release
 
 ### Dodging

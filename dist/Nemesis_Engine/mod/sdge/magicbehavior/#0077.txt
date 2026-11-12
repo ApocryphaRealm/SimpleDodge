@@ -209,6 +209,7 @@
 				<hkcstring>bHeadTracking</hkcstring>
 				<hkcstring>TDM_Dodge</hkcstring>
 				<hkcstring>TDM_TargetLock</hkcstring>
+				<hkcstring>iSDGLongRoll</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="characterPropertyNames" numelements="7">

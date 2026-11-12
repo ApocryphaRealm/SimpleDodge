@@ -1,5 +1,6 @@
 #pragma once
 #include "Settings.h"
+#include "TapDetector.h"
 
 namespace Dodge
 {
@@ -90,26 +91,6 @@ inline const char* DodgeResultToString(const DodgeResult result)
 }
 
 
-struct DoublePress
-{
-    using Clock     = std::chrono::steady_clock;
-    using TimePoint = Clock::time_point;
-
-    static constexpr auto threshold = std::chrono::milliseconds(300);
-
-    TimePoint last_press{}; // zero = never pressed
-
-    bool on_key_pressed()
-    {
-        const auto now = Clock::now();
-
-        const bool is_double = last_press != TimePoint{} && (now - last_press) <= threshold;
-        last_press           = now;
-        return is_double;
-    }
-    void reset_last_press() { last_press = TimePoint{}; }
-};
-
 struct DodgeInputBuffer
 {
     using Clock     = std::chrono::steady_clock;
@@ -180,7 +161,13 @@ struct MenuBlocker
     [[nodiscard]] bool active() const { return Clock::now() < blockUntil; }
 };
 static MenuBlocker g_menuBlocker;
-void OnInput();                                        // Called by the 3 input methods
+void OnInput();                                        // A dodge request (single-press mode, or a completed double tap)
+// Double-tap mode (bUseDoubleTap): a completed short tap of the dodge, sprint or sneak key - pressed at a_down and
+// released at a_up, already checked short by the caller. Two in a row within the gap window dodge (TapDetector.h).
+void OnTap(Tap::TimePoint a_down, Tap::TimePoint a_up);
+void OnHold();                                         // a press of one of those keys that was a hold: no double tap
+// bDirectionalDoubleTap: a movement key or the left stick was double-tapped toward a_dir (x right, y forward).
+void OnDirectionalDoubleTap(RE::NiPoint2 a_dir);
 void Update(RE::Actor* a_actor);                       // Called in the player update loop
 bool CanDodge(RE::Actor* a_actor);                     // main decider if dodge is allowed
 bool DoDodge(RE::Actor* a_actor);                      // do dodge

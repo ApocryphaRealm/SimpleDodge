@@ -591,6 +591,7 @@
 				<hkcstring>TKDR_IframeDuration</hkcstring>
 				<hkcstring>TDM_TargetLock</hkcstring>
 				<hkcstring>bHeadTracking</hkcstring>
+				<hkcstring>iSDGLongRoll</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="characterPropertyNames" numelements="9">

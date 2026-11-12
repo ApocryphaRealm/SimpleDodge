@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.21)
 # built with CMake + vcpkg CommonLibSSE-NG. GPL-3.0-or-later; NOTICE.md credits the code it is based on.
 project(
 	SimpleDodge
-	VERSION 1.0.0
+	VERSION 1.1.0
 	LANGUAGES CXX
 )
 

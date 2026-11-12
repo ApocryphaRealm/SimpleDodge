@@ -10,29 +10,55 @@
 namespace Dodge
 {
 static DodgeInputBuffer buffer;
-static DoublePress dodgeDoublePress;
+// 1.1.0: one detector of TAPS (press + release, each short) shared by the dodge, sprint and sneak keys, replacing the
+// 1.0.0 count of "down" events, which a held sprint key could satisfy on its own (TapDetector.h says why).
+static Tap::DoubleTap dodgeDoubleTap;
+// Direction of a directional double tap, used only when no movement is held by the time the dodge fires.
+static bool g_hasForcedDirection = false;
+static RE::NiPoint2 g_forcedDirection{};
+
+static bool InputBlocked()
+{
+    return Utility::IsInMenu() || g_menuBlocker.active();
+}
 
 void OnInput()
 {
-    if (Utility::IsInMenu())
+    if (InputBlocked())
         return;
-    if (g_menuBlocker.active())
-        return;
+    g_hasForcedDirection = false;
+    buffer.push();
+};
 
-    if (Config::Settings::use_double_tap.GetValue())
+void OnTap(Tap::TimePoint a_down, Tap::TimePoint a_up)
+{
+    if (!Config::Settings::use_double_tap.GetValue() || InputBlocked())
+        return;
+    if (dodgeDoubleTap.OnTap(a_down, a_up))
     {
-        if (dodgeDoublePress.on_key_pressed())
-        {
-            dodgeDoublePress.last_press = {};
-            buffer.push();
-        }
+        logger::debug("Double tap ({:.2f}s tap) - dodge input", Tap::SecondsBetween(a_down, a_up));
+        OnInput();
     }
     else
     {
-        dodgeDoublePress.last_press = {};
-        buffer.push();
+        logger::trace("First tap of a double tap ({:.2f}s)", Tap::SecondsBetween(a_down, a_up));
     }
-};
+}
+
+void OnHold()
+{
+    dodgeDoubleTap.OnHold();
+}
+
+void OnDirectionalDoubleTap(RE::NiPoint2 a_dir)
+{
+    if (!Config::Settings::directional_double_tap.GetValue() || InputBlocked())
+        return;
+    logger::debug("Direction double-tapped ({:.0f}, {:.0f}) - dodge input", a_dir.x, a_dir.y);
+    buffer.push();
+    g_forcedDirection = a_dir;
+    g_hasForcedDirection = true;
+}
 
 void Update(RE::Actor* a_actor)
 {
@@ -181,7 +207,20 @@ void ApplyDodgeCostActor(RE::Actor* a_actor)
 
 DodgeEventResult GetDodgeEvent(std::string& a_event)
 {
-    const auto normalizedInputDirection = Utility::Vec2Normalize(RE::PlayerControls::GetSingleton()->data.prevMoveVec);
+    const auto* controls = RE::PlayerControls::GetSingleton();
+    if (!controls)
+    {
+        logger::warn("Dodge: PlayerControls is null; no direction");
+        return DodgeEventResult::kNoDirection;
+    }
+    auto normalizedInputDirection = Utility::Vec2Normalize(controls->data.prevMoveVec);
+    // A directional double tap names its own direction; the held movement wins when there is one (so a second key
+    // held at the same time gives the diagonal), the tapped direction otherwise.
+    if (normalizedInputDirection.x == 0.f && normalizedInputDirection.y == 0.f && g_hasForcedDirection)
+    {
+        normalizedInputDirection = g_forcedDirection;
+    }
+    g_hasForcedDirection = false;
     if (normalizedInputDirection.x == 0.f && normalizedInputDirection.y == 0.f)
     {
         return DodgeEventResult::kNoDirection;
@@ -487,15 +526,34 @@ bool DoDodge(RE::Actor* a_actor)
     if (result == DodgeEventResult::kNoDirection && !Config::Settings::enable_dodge_in_place.GetValue())
         return false;
 
+    // iStep picks the clip through iStepSelector = iStep + iIsPlayer: 0 = roll, 2 = step, 4 = long roll (1.1.0). The
+    // long-roll slots exist only in a graph generated from the 1.1.0 patch, which also declares iSDGLongRoll = 1;
+    // asking for slot 4 in an older graph would point past its selector's last generator, so it falls back to 0.
+    int iStep = 0;
     if (Config::Settings::step_dodge.GetValue())
     {
-        logger::debug("step dodge bool is {}", Config::Settings::step_dodge.GetValue());
-        logger::debug("step dodge active");
-        a_actor->SetGraphVariableInt("iStep", 2);
+        iStep = 2;
     }
-    else
-        a_actor->SetGraphVariableInt("iStep", 0);
-    logger::debug("step dodge bool is {}", Config::Settings::step_dodge.GetValue());
+    else if (Config::Settings::long_roll.GetValue())
+    {
+        int ready = 0;
+        if (a_actor->GetGraphVariableInt("iSDGLongRoll", ready) && ready == 1)
+        {
+            iStep = 4;
+        }
+        else
+        {
+            static bool warned = false;
+            if (!warned)
+            {
+                warned = true;
+                logger::warn("Dodge: Long roll is on but this character's behaviour has no long roll (iSDGLongRoll) - "
+                             "run Nemesis or Pandora again with Simple Dodge ticked. Using the standard roll.");
+            }
+        }
+    }
+    a_actor->SetGraphVariableInt("iStep", iStep);
+    logger::debug("Dodge: {} (iStep {})", iStep == 2 ? "step" : (iStep == 4 ? "long roll" : "roll"), iStep);
 
     CastOnDodgeSpell(a_actor);
     float iFrames = Config::Settings::i_frame_duration.GetValue();
@@ -513,6 +571,7 @@ bool DoDodge(RE::Actor* a_actor)
 void ClearBuffer()
 {
     buffer.clear();
-    dodgeDoublePress.reset_last_press();
+    dodgeDoubleTap.Reset();
+    g_hasForcedDirection = false;
 }
 } // namespace Dodge

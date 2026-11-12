@@ -1,12 +1,15 @@
 #include "InputEvents.h"
 
+#include "Compat.h"
 #include "Settings.h"
+#include "TapDetector.h"
 #include "Utility.h"
 #include "dodging.h"
 #include "ui.h"
 #include "utils/Logger.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace Events
 {
@@ -62,6 +65,140 @@ namespace Events
 		return EventResult::kContinue;
 	}
 
+	namespace
+	{
+		// The dodge key, counted once from its first down to its release (1.1.0). This sink runs AFTER the player
+		// controls on the same events, so it also sees what their hooks rewrote - the sprint hook hands the game a held
+		// press with heldDownSecs 0, which 1.0.0 read here as a new press every frame (TapDetector.h).
+		Tap::Press g_dodgeKey;
+		bool       g_dodgeKeyBlocked = false;  // this press began in a menu or just after one closed
+
+		bool BlockedNow(std::uint32_t a_id)
+		{
+			if (Utility::IsInMenu()) {
+				logger::trace("Dodge key {} pressed in a menu - ignored", a_id);
+				return true;
+			}
+			// And for a moment AFTER a menu closes. The press that closes a menu reaches gameplay in the same breath
+			// as the close, with the menu already shut, so the open check above cannot see it - which is why exiting
+			// the journal dodged while exiting from its System tab, a frame slower, did not.
+			if (Compat::WithinMenuExitGrace(Config::Settings::menu_exit_grace.GetValue())) {
+				logger::trace("Dodge key {} pressed just after a menu closed - ignored", a_id);
+				return true;
+			}
+			return false;
+		}
+
+		// A key that is ALSO the sprint (or sneak) key, with that key's tap dodge on, belongs to that hook: one
+		// physical tap reached both in 1.0.0 and counted twice.
+		bool OwnedByAHook(const RE::ButtonEvent* a_button)
+		{
+			const auto* userEvents = RE::UserEvents::GetSingleton();
+			if (!userEvents) {
+				return false;
+			}
+			const auto& ue = a_button->QUserEvent();
+			return (Config::Settings::use_sprint_key.GetValue() && ue == userEvents->sprint) ||
+			       (Config::Settings::enable_sneak_key_dodge.GetValue() && ue == userEvents->sneak);
+		}
+
+		void HandleDodgeKey(const RE::ButtonEvent* a_button, std::uint32_t a_id)
+		{
+			const auto now = Tap::Clock::now();
+			if (a_button->IsPressed()) {
+				if (g_dodgeKey.held) {
+					return;  // still the same press: a repeat, or an event another handler rewrote
+				}
+				g_dodgeKey.Down(now);
+				// First seen already held (it went down in a menu) or blocked now: this whole press is not a dodge.
+				g_dodgeKeyBlocked = !a_button->IsDown() || BlockedNow(a_id);
+				if (g_dodgeKeyBlocked) {
+					return;
+				}
+				logger::debug("Dodge key {} pressed", a_id);
+				if (!Config::Settings::use_double_tap.GetValue()) {
+					Dodge::OnInput();
+				}
+				return;
+			}
+			if (!a_button->IsUp()) {
+				return;
+			}
+			const auto down = g_dodgeKey.downAt;
+			const float held = g_dodgeKey.Up(now);
+			if (held < 0.0F || g_dodgeKeyBlocked || !Config::Settings::use_double_tap.GetValue()) {
+				return;
+			}
+			if (Tap::IsTap(held, a_button->HeldDuration())) {
+				Dodge::OnTap(down, now);
+			} else {
+				logger::trace("Dodge key {} held {:.2f}s - not a tap", a_id, held);
+				Dodge::OnHold();
+			}
+		}
+
+		// bDirectionalDoubleTap: forward, back, left, right - each its own double-tap detector.
+		Tap::DirectionalDoubleTap g_dirs[4];
+		const RE::NiPoint2        kDirVec[4] = { { 0.0F, 1.0F }, { 0.0F, -1.0F }, { -1.0F, 0.0F }, { 1.0F, 0.0F } };
+		const char*               kDirName[4] = { "forward", "back", "left", "right" };
+		int                       g_stickDir = -1;  // the direction the left stick is pushed in, -1 = centred
+
+		void DirectionDown(int a_dir)
+		{
+			if (g_dirs[a_dir].Down(Tap::Clock::now())) {
+				logger::debug("Direction {} double-tapped", kDirName[a_dir]);
+				Dodge::OnDirectionalDoubleTap(kDirVec[a_dir]);
+			}
+		}
+
+		void DirectionUp(int a_dir) { g_dirs[a_dir].Up(Tap::Clock::now()); }
+
+		void HandleMovementKey(const RE::ButtonEvent* a_button)
+		{
+			const auto* ue = RE::UserEvents::GetSingleton();
+			if (!ue) {
+				return;
+			}
+			const auto& name = a_button->QUserEvent();
+			int dir = -1;
+			if (name == ue->forward) { dir = 0; }
+			else if (name == ue->back) { dir = 1; }
+			else if (name == ue->strafeLeft) { dir = 2; }
+			else if (name == ue->strafeRight) { dir = 3; }
+			if (dir < 0) {
+				return;
+			}
+			if (a_button->IsPressed()) {
+				DirectionDown(dir);  // Press counts it once however many downs arrive
+			} else if (a_button->IsUp()) {
+				DirectionUp(dir);
+			}
+		}
+
+		// The left stick as four "keys": pushed past 0.75 toward the dominant axis is a press, back under 0.3 a release.
+		void HandleStick(const RE::ThumbstickEvent* a_stick)
+		{
+			if (!a_stick->IsLeft()) {
+				return;
+			}
+			const float x = a_stick->xValue;
+			const float y = a_stick->yValue;
+			const float mag = std::sqrt(x * x + y * y);
+			int dir = g_stickDir;
+			if (mag >= 0.75F) {
+				dir = std::abs(y) >= std::abs(x) ? (y > 0.0F ? 0 : 1) : (x < 0.0F ? 2 : 3);
+			} else if (mag < 0.30F) {
+				dir = -1;
+			}
+			if (dir == g_stickDir) {
+				return;
+			}
+			if (g_stickDir >= 0) { DirectionUp(g_stickDir); }
+			g_stickDir = dir;
+			if (dir >= 0) { DirectionDown(dir); }
+		}
+	}
+
 	EventResult InputEvent::ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>*)
 	{
 		if (!a_event) {
@@ -73,28 +210,24 @@ namespace Events
 		}
 
 		const auto bound = Config::Settings::dodge_key.GetValue();
+		const bool directional = Config::Settings::directional_double_tap.GetValue();
 		for (auto e = *a_event; e; e = e->next) {
-			const auto button = e->AsButtonEvent();
-			if (!button || !button->IsDown() || !button->HasIDCode()) {
+			if (directional && e->GetEventType() == RE::INPUT_EVENT_TYPE::kThumbstick) {
+				HandleStick(static_cast<const RE::ThumbstickEvent*>(e));
 				continue;
+			}
+			const auto button = e->AsButtonEvent();
+			if (!button || !button->HasIDCode()) {
+				continue;
+			}
+			if (directional) {
+				HandleMovementKey(button);
 			}
 			const auto id = KeyCodeOf(button);
-			if (bound <= 1 || id != bound) {
+			if (bound <= 1 || id != bound || OwnedByAHook(button)) {
 				continue;
 			}
-			if (Utility::IsInMenu()) {
-				logger::trace("Dodge key {} pressed in a menu - ignored", id);
-				continue;
-			}
-			// And for a moment AFTER a menu closes. The press that closes a menu reaches gameplay in the same breath
-			// as the close, with the menu already shut, so the open check above cannot see it - which is why exiting
-			// the journal dodged while exiting from its System tab, a frame slower, did not.
-			if (Compat::WithinMenuExitGrace(Config::Settings::menu_exit_grace.GetValue())) {
-				logger::trace("Dodge key {} pressed just after a menu closed - ignored", id);
-				continue;
-			}
-			logger::debug("Dodge key {} pressed", id);
-			Dodge::OnInput();
+			HandleDodgeKey(button, id);
 		}
 		return EventResult::kContinue;
 	}

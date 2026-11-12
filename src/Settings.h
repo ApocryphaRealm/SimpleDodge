@@ -56,6 +56,13 @@ namespace Config
 		inline static Value<bool>        remove_forward{ "Settings", "bRemoveForwardDodge", false };
 		// 8-way (the owner, 2026-11-11): diagonals get their own dodge; off = the four main directions only
 		inline static Value<bool>        eight_way{ "Settings", "bEightWayDodge", true };
+		// Double-tap a movement key, or flick the left stick twice, to dodge that way (1.1.0, a player's request,
+		// 2026-11-12). Off by default: it changes what tapping a direction does.
+		inline static Value<bool>        directional_double_tap{ "Settings", "bDirectionalDoubleTap", false };
+		// Rolls play the behaviour patch's TKDodgeLongRoll clips, whose motion data travels 1.5x the step's (1.1.0, a
+		// player: "for the roll dodge it makes more sense to cover more ground"). Off = the roll goes as far as the
+		// step, as in 1.0.0. Needs the 1.1.0 patch generated (the graph variable iSDGLongRoll); without it, the old roll.
+		inline static Value<bool>        long_roll{ "Settings", "bLongRoll", true };
 		// How long after a menu CLOSES a dodge key press is ignored, in seconds.
 		//
 		// The menu-open check is not enough on its own: the press that closes a menu is delivered to gameplay in the
