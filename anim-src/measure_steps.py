@@ -60,11 +60,19 @@ for d in dirs:
     flex_l, ang_l, off_l = knee(frames[fl][0], lead)
     flex_max = max(knee(frames[f][0], lead)[0] for f in range(fl, min(D.nf, fl + 6)))
     leans = [lean(G) for G, r, ft in frames]
+    # contact (v3, 2026-11-12): a foot is OFF the ground when its lift is over 0.3 units; toe height = the toe joint's
+    # rise above its rest height, the most over the clip
+    P0 = M["P0"]
+    off = [sum(1 for pre in ("lf", "rf") if D.foot(pre, f)[2] > 0.3) for f in range(D.nf)]
+    toe = max(max(pos(G, f"NPC {s} Toe0 [{s}Toe]").z - P0(f"NPC {s} Toe0 [{s}Toe]").z for s in "LR") for G, r, ft in frames)
     res[d] = dict(frames=D.nf, lead=lead, landing_frame=fl,
-                  pelvis_z=dict(stance=round(pz[0], 1), lowest=round(min(pz), 1), at_landing=round(pz[fl], 1)),
+                  pelvis_z=dict(stance=round(pz[0], 1), lowest=round(min(pz), 1), at_landing=round(pz[fl], 1),
+                                highest_after_frame0=round(max(pz[1:]), 1)),
+                  contact=dict(both_feet_off_frames=sum(1 for c in off if c == 2), max_toe_rise=round(toe, 1)),
                   knee_flex=dict(at_landing=round(flex_l, 1), deepest_after=round(flex_max, 1)),
                   knee_in=dict(at_landing_deg=round(ang_l, 1), offset_toward_centre=round(off_l, 1)),
                   lean=dict(max_before_landing=round(max(leans[:fl + 1]) - leans[0], 1),
+                            counter_after_landing=round(min(leans[fl:]) - leans[0], 1),
                             last_frame=round(leans[-1] - leans[0], 1), stance_raw=round(leans[0], 1)))
     print(d, json.dumps(res[d]))
 json.dump(res, open(out, "w"), indent=1)

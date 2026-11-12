@@ -25,3 +25,5 @@ anim-src/gif-showcase/
 
 # rework working files (before/after renders, downloads)
 _work/
+anim-src/weapons/_before/
+anim-src/weapons/_review/

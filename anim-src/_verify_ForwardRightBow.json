@@ -1,0 +1,177 @@
+{
+ "ours": {
+  "duration": 0.8667,
+  "frames": 27,
+  "fps": 30.0,
+  "tracks": 99,
+  "blend_hint": 0,
+  "skeleton_name": "NPC Root [Root]",
+  "binding": 99,
+  "annotations": [
+   [
+    0.0,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.1667,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.2333,
+    "animmotion 25.762 25.762 0"
+   ],
+   [
+    0.2667,
+    "animmotion 45.038 45.038 0"
+   ],
+   [
+    0.4,
+    "animmotion 91.878 91.878 0"
+   ],
+   [
+    0.7,
+    "animmotion 202.222 202.222 0"
+   ],
+   [
+    0.8333,
+    "animmotion 226.272 226.272 0"
+   ],
+   [
+    0.8667,
+    "animmotion 226.272 226.272 0"
+   ]
+  ],
+  "animated_bones": [
+   "NPC COM [COM ]",
+   "NPC L Thigh [LThg]",
+   "NPC L Calf [LClf]",
+   "NPC L Foot [Lft ]",
+   "NPC R Thigh [RThg]",
+   "NPC R Calf [RClf]",
+   "NPC R Foot [Rft ]",
+   "NPC Spine [Spn0]",
+   "NPC Spine1 [Spn1]",
+   "NPC Spine2 [Spn2]",
+   "NPC Neck [Neck]",
+   "NPC Head [Head]",
+   "NPC L Toe0 [LToe]",
+   "NPC R Toe0 [RToe]"
+  ],
+  "translating_bones": [
+   "NPC COM [COM ]"
+  ],
+  "root_track_static": true
+ },
+ "reference": {
+  "duration": 0.8667,
+  "frames": 27,
+  "fps": 30.0,
+  "tracks": 99,
+  "blend_hint": 0,
+  "skeleton_name": "NPC Root [Root]",
+  "binding": 99,
+  "annotations": [
+   [
+    0.0,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.1667,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.2333,
+    "animmotion 25.762 25.762 0"
+   ],
+   [
+    0.2667,
+    "animmotion 45.038 45.038 0"
+   ],
+   [
+    0.4,
+    "animmotion 91.878 91.878 0"
+   ],
+   [
+    0.7,
+    "animmotion 202.222 202.222 0"
+   ],
+   [
+    0.8333,
+    "animmotion 226.272 226.272 0"
+   ],
+   [
+    0.8667,
+    "animmotion 226.272 226.272 0"
+   ]
+  ],
+  "animated_bones": [
+   "NPC COM [COM ]",
+   "NPC L Thigh [LThg]",
+   "NPC L Calf [LClf]",
+   "NPC L Foot [Lft ]",
+   "NPC R Thigh [RThg]",
+   "NPC R Calf [RClf]",
+   "NPC R Foot [Rft ]",
+   "NPC Spine [Spn0]",
+   "NPC Spine1 [Spn1]",
+   "NPC Spine2 [Spn2]",
+   "NPC Neck [Neck]",
+   "NPC Head [Head]",
+   "NPC L Toe0 [LToe]",
+   "NPC R Toe0 [RToe]"
+  ],
+  "translating_bones": [
+   "NPC COM [COM ]"
+  ],
+  "root_track_static": true
+ },
+ "reimport": {
+  "result": "set()",
+  "action": "StepDodgeForwardRight",
+  "frame_range": [
+   1.0,
+   27.0
+  ],
+  "markers": [
+   [
+    1,
+    "animmotion 0 0 0"
+   ],
+   [
+    6,
+    "animmotion 0 0 0"
+   ],
+   [
+    8,
+    "animmotion 25.762 25.762 0"
+   ],
+   [
+    9,
+    "animmotion 45.038 45.038 0"
+   ],
+   [
+    13,
+    "animmotion 91.878 91.878 0"
+   ],
+   [
+    22,
+    "animmotion 202.222 202.222 0"
+   ],
+   [
+    26,
+    "animmotion 226.272 226.272 0"
+   ],
+   [
+    27,
+    "animmotion 226.272 226.272 0"
+   ]
+  ],
+  "armature_bones": 99,
+  "bones_match_skeleton": true,
+  "hkx_bone_list_matches_skeleton_order": true,
+  "max_joint_error_units": 0.0557
+ },
+ "track_count_equals_skeleton": true,
+ "annotations_match_reference": true,
+ "duration_matches_motion_data": true
+}

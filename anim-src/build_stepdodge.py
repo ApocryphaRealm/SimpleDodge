@@ -257,7 +257,7 @@ def gait(pre, plants, lifts):
             nfs = plants[i + 1][0]
             if fe - 2 > fs: H[fe - 2] = 0.0
             H[fe] = toe; H[fe + (nfs - fe) * 0.35] = toe * 0.4
-            if nfs - 1 > fe + (nfs - fe) * 0.35 + 0.5: H[nfs - 1] = -4.0
+            if nfs - 1 > fe + (nfs - fe) * 0.35 + 0.5: H[nfs - 1] = -2.0    # heel-first touch; -4 lifted the toe ~5 units (v3)
             L[(fe + nfs) / 2] = lifts[i]
         else:
             H[fe] = 0.0
@@ -383,6 +383,24 @@ def _feet(g, axis, lead, push):
     out[lead[0] + "_" + axis] = lead[3]; out[push[0] + "_" + axis] = push[3]
     return out
 
+# ---- v3 (the owner, 2026-11-12 18:04): "make sure that their feet never leave the ground ... Or if they do, make it a
+# very, very low or small elevation ... lean into a jump in the direction you're jumping or dodging. And then on landing,
+# or as you land, pull back a little in the opposite direction as the knee shoulders the blow of the landing."
+# A heavy step, not a hop: the lead foot skims (at most 2 units up), the push foot SLIDES on the floor behind the body
+# until the lead foot has landed and only then lifts 1.5 units to set down - so one foot is always on the floor. The
+# body stays below the stance height the whole way (no bob), the trunk leans 20-30 degrees into the travel, and rocks
+# back past upright as the lead knee takes the landing before it settles.
+LEAD_SKIM, PUSH_SET = 2.0, 1.5
+def grounded(K, lead, push, push_land, e, pre=()):
+    """Lead foot's swing scaled to LEAD_SKIM; push foot on the floor (sliding) until 3 frames before it lands, a
+    PUSH_SET lift to set it down. pre: lift keys of the push foot before its slide (a stance switch's shuffle)."""
+    L = K[lead + "_lift"]; m = max(v for _, v in L) or 1.0
+    K[lead + "_lift"] = [(f, v * LEAD_SKIM / m) for f, v in L]
+    K[push + "_lift"] = list(pre) + [(max(pre[-1][0] + 1 if pre else 0, push_land - 3), 0.0),
+                                    (push_land - 1.5, PUSH_SET), (push_land, 0.0), (e, 0.0)]
+    if not pre: K[push + "_lift"].insert(0, (0, 0.0))
+    return K
+
 RIGHT = Design("Right", dict(
     com_off_x=[(0, 0), (2, -14), (3, -24), (5, -14), (9, 0), (12, 12), (14, 15), (15, 16), (17, 16), (19, 8), (21, 0)],
     com_off_y=[(0, 0.5), (21, 0.5)],
@@ -390,11 +408,11 @@ RIGHT = Design("Right", dict(
     # to the ground with more knee bending on arrival"): the whole step ~5 units lower, the landing compression deeper
     # (pelvis dips to ~51 on the lead foot's landing) before rising back to the stance; the trunk leans into the travel
     # through the push and flight and is upright again after the landing.
-    com_z=[(0, 64.5), (2, 57), (3, 54), (4, 56), (7, 59.5), (10, 61), (13, 58), (15, 53.5), (17, 51), (19, 56.5), (21, 64.5)],
-    hip_roll=[(0, 0), (2, 4), (4, 9), (8, 10), (12, 7), (15, 3), (17, -1), (19, -0.5), (21, 0)],      # + leans right
+    com_z=[(0, 64.5), (2, 58), (3, 56), (5, 55.5), (8, 56), (11, 55.5), (13, 54.5), (15, 52.5), (17, 50.5), (19, 55.5), (21, 64.5)],
+    hip_roll=[(0, 0), (2, 8), (4, 15), (8, 18), (12, 15), (14, 7), (15, 0), (16, -6), (17, -9), (19, -5), (21, 0)],   # + leans right
     hip_pitch=[(0, -2), (3, -6), (7, -4), (12, -3), (16, -6), (19, -4), (21, -2)],
     hip_yaw=[(0, 0), (3, 3), (9, -2), (15, 2), (21, 0)],
-    spine_roll=[(0, 0), (3, 4), (6, 8), (10, 8), (13, 4), (16, 0), (18, -1), (21, 0)],
+    spine_roll=[(0, 0), (3, 7), (6, 15), (10, 16), (13, 9), (15, -1), (17, -6), (19, -3), (21, 0)],
     spine_pitch=[(0, -3), (3, -7), (15, -6), (21, -3)],
     # knee_in 0..1 (the owner, 2026-11-12: "the knee you land on should point toward the body on landing"): turns that
     # leg's knee from slightly out (0) to in toward the centre line (1) through its landing and absorb
@@ -407,18 +425,19 @@ RIGHT = Design("Right", dict(
         ("lf", [(0, 3, -12, 16, 30), (19, 21, 239.2, 16, 0)], [12],
          [(0, -12), (3, -12), (6, 47), (9, 102), (13, 182), (16, 224), (19, 239.2), (21, 239.2)])),
 ))
+grounded(RIGHT.K, "rf", "lf", 19, 21)
 LEFT = Mirror("Left", RIGHT)
 
 _FY = 409.283
 FORWARD = Design("Forward", dict(
     com_off_x=[(0, 0), (26, 0)],
     com_off_y=[(0, 0.5), (2, -8), (4, -16), (7, -6), (11, 5), (15, 14), (17, 22), (20, 24), (23, 10), (26, 0.5)],
-    com_z=[(0, 64.5), (2, 59), (4, 55), (6, 58), (9, 61.5), (12, 63), (15, 61), (18, 56.5), (20, 52.5), (22, 50.5),
+    com_z=[(0, 64.5), (2, 59), (4, 56), (7, 55.5), (11, 56), (15, 55), (18, 53.5), (20, 52), (22, 50.5),
            (24, 56), (26, 64.5)],
-    hip_pitch=[(0, -2), (3, -8), (6, -13), (11, -15), (17, -13), (20, -10), (23, -5), (26, -2)],
+    hip_pitch=[(0, -2), (3, -10), (6, -17), (11, -20), (17, -17), (19, -7), (20, 1), (21, 6), (23, 3), (26, -2)],
     hip_roll=[(0, 0), (4, -2), (10, 1), (17, 2), (21, -1), (26, 0)],
     hip_yaw=[(0, 0), (3, -3), (6, -6), (12, 2), (17, 5), (22, -2), (26, 0)],
-    spine_pitch=[(0, -3), (4, -9), (11, -12), (17, -11), (21, -7), (24, -4), (26, -3)],
+    spine_pitch=[(0, -3), (4, -11), (11, -16), (17, -14), (19, -5), (21, 5), (23, 2), (26, -3)],
     lf_knee_in=[(0, 0), (17, 0), (19, 1), (24, 1), (26, 0)], rf_knee_in=[(0, 0), (21, 0), (23, 0.8), (25, 0.6), (26, 0)],
     lh_dy=[(0, 0), (6, 4), (14, -2), (20, 2), (26, 0)], rh_dy=[(0, 0), (6, -4), (14, 2), (20, -2), (26, 0)],
     **_feet(None, "y",
@@ -428,16 +447,18 @@ FORWARD = Design("Forward", dict(
          [(0, -16), (4, -16), (7, 50), (11, 155), (15, 255), (19, 340), (23, _FY - 16), (26, _FY - 16)])),
 ))
 
+grounded(FORWARD.K, "lf", "rf", 23, 26)
+
 BACK = Design("Back", dict(
     com_off_x=[(0, 0), (24, 0)],
     com_off_y=[(0, 0.5), (2, 10), (3, 20), (5, 10), (8, 0), (10, -8), (14, -18), (17, -24), (19, -14), (22, -4), (24, 0.5)],
-    com_z=[(0, 64.5), (2, 58), (3, 55), (5, 57.5), (8, 60.5), (11, 61), (14, 58), (16, 54), (18, 51), (20, 52.5),
+    com_z=[(0, 64.5), (2, 58), (3, 56), (5, 55.5), (8, 56), (11, 55.5), (14, 54.5), (16, 53), (18, 51), (20, 52.5),
            (22, 57), (24, 64.5)],
     # + pitch leans back, into this clip's travel; forward again to absorb the landing, then the stance
-    hip_pitch=[(0, -2), (3, -5), (6, 2), (10, 6), (14, 4), (17, 0), (20, -3), (22, -3), (24, -2)],
+    hip_pitch=[(0, -2), (3, -4), (6, 8), (10, 15), (14, 13), (16, 4), (17, -5), (19, -10), (21, -6), (24, -2)],
     hip_roll=[(0, 0), (5, 2), (12, -1), (18, 1), (24, 0)],
     hip_yaw=[(0, 0), (3, 3), (9, -3), (16, 2), (24, 0)],
-    spine_pitch=[(0, -3), (3, -5), (7, 2), (11, 5), (15, 2), (18, -3), (21, -4), (24, -3)],
+    spine_pitch=[(0, -3), (3, -4), (7, 9), (11, 14), (15, 8), (17, -3), (19, -8), (21, -5), (24, -3)],
     rf_knee_in=[(0, 0), (14, 0), (16, 1), (21, 1), (24, 0)], lf_knee_in=[(0, 0), (19, 0), (21, 0.8), (23, 0.6), (24, 0)],
     lh_dy=[(0, 0), (4, 4), (10, 2), (16, -1), (24, 0)], rh_dy=[(0, 0), (4, 4), (10, 2), (16, -1), (24, 0)],
     **_feet(None, "y",
@@ -446,6 +467,8 @@ BACK = Design("Back", dict(
         ("lf", [(0, 3, -12, 16, 28), (21, 24, -12, -284.0, 0)], [10],
          [(0, 16), (3, 16), (6, -60), (10, -140), (14, -210), (18, -262), (21, -284.0), (24, -284.0)])),
 ))
+
+grounded(BACK.K, "rf", "lf", 21, 24)
 
 class Roll(Design):
     """A simple tucked roll: crouch, dive, one full turn (end over end for Forward/Back, sideways for Left/Right),
@@ -581,8 +604,9 @@ class Diagonal(Design):
     # 2026-11-12: laid onto the diagonal, the lead foot lands further from the hips than in the side clip (the stance's
     # own fore-aft offset adds to the travel), so the lead leg reached full stretch and landed straight. The body is
     # carried a little further along the axis and lower through the landing, so that leg arrives bent.
-    LAND_LEAD = [(0, 0), (10, 0), (13, 8), (15, 10), (18, 4), (21, 0)]
+    LAND_LEAD = [(0, 0), (10, 0), (13, 5), (15, 6), (18, 3), (21, 0)]
     LAND_DZ = [(0, 0), (11, 0), (14, -3), (16, -2), (19, 0), (21, 0)]
+    PUSH_EARLY = [(0, 0), (2, 0), (4, 9), (7, 6), (10, 0), (21, 0)]
     def com_local(self, f):
         S = self.src
         w = (S.com_local(f) + S.root(f)).x * self.sgn * self.k   # body travel along the dodge axis
@@ -594,6 +618,11 @@ class Diagonal(Design):
         x, y, lift, heel = self.src.foot(pre, f)
         x0 = self.src.foot(pre, 0)[0]
         a = (x - x0) * self.sgn * self.k
+        # v3: the push foot (Right's left, Left's right) starts its floor slide a little early on the diagonal, where
+        # the body leaves it faster than in the side clip - left planted it was stretched past reach at frame 4 and
+        # its toe rose ~5 units
+        if pre == ("lf" if self.sgn > 0 else "rf"):
+            a += mono(self.PUSH_EARLY, f)
         sx, sy = (-12.0, 16.0) if pre == "lf" else (12.0, -16.0)
         p = Vector((sx, sy, 0.0)) + self.u * a
         return p.x, p.y, lift, heel
@@ -633,11 +662,14 @@ def _switch_keys(name):
     sw = {"lf": (-12.0, -16.0), "rf": (12.0, 16.0)}                 # switched stance
     K = dict(
         body_yaw=[(0, 0), (3, 25), (6, 50), (18, 50), (23, 25), (e, 0)],     # whole body turns to the switched side
-        com_z=[(0, 64.5), (2, 60), (5, 55.5), (8, 59), (13, 61), (18, 58), (21, 52.5), (23, 50.5), (25, 56), (e, 64.5)],
+        com_z=[(0, 64.5), (2, 60), (5, 56), (8, 55.5), (13, 56), (18, 54.5), (21, 52), (23, 50.5), (25, 56), (e, 64.5)],
         lag=[(0, 0), (4, -4), (8, 0), (16, 8), (21, 6), (e, 0)],
-        hip_roll=[(0, 0), (6, 7 * ux / abs(ux)), (14, 8 * ux / abs(ux)), (21, -1 * ux / abs(ux)), (e, 0)],
-        hip_pitch=[(0, -2), (6, -10 if fwd else 6), (14, -9 if fwd else 7), (21, -6 if fwd else -3), (e, -2)],
-        spine_pitch=[(0, -3), (6, -9 if fwd else 3), (16, -8 if fwd else 4), (e, -3)],
+        hip_roll=[(0, 0), (6, 10 * ux / abs(ux)), (14, 12 * ux / abs(ux)), (19, 2 * ux / abs(ux)), (21, -6 * ux / abs(ux)),
+                  (23, -3 * ux / abs(ux)), (e, 0)],
+        spine_roll=[(0, 0), (6, 8 * ux / abs(ux)), (16, 8 * ux / abs(ux)), (21, -4 * ux / abs(ux)), (e, 0)],
+        hip_pitch=[(0, -2), (6, -12 if fwd else 15), (14, -12 if fwd else 17), (19, -4 if fwd else 2), (21, 7 if fwd else -6),
+                   (23, 2 if fwd else -3), (e, -2)],
+        spine_pitch=[(0, -3), (6, -12 if fwd else 13), (16, -10 if fwd else 15), (21, 5 if fwd else -5), (e, -3)],
     )
     K[("rf" if fwd else "lf") + "_knee_in"] = [(0, 0), (19, 0), (21, 1), (24, 1), (e, 0)]      # lead foot lands at 21
     K[("lf" if fwd else "rf") + "_knee_in"] = [(0, 0), (23, 0), (25, 0.8), (e, 0.3)]           # push foot at 25
@@ -670,6 +702,9 @@ def _switch_keys(name):
         K[pre + "_x"], K[pre + "_y"] = xs, ys
     path(push, st[push], [(9, -38), (12, -28), (15, -18), (18, -8), (21, -3)], (6, sw[push][0], sw[push][1]), 25)
     path(lead, st[lead], [(7, 26), (11, 36), (15, 34), (18, 20)], (3, st[lead][0], st[lead][1]), 21)
+    # v3 grounding: the lead skims, the push foot slides until it sets down at 25 (Forward-Right keeps its 1.5-unit
+    # stance-switch shuffle at frames 0-3, while the lead foot is still planted)
+    grounded(K, lead, push, 25, e, pre=[(0, 0.0), (1.5, PUSH_SET), (3, 0.0)] if fwd else ())
     # foot turn per frame: the rear foot is turned out; the push foot becomes the rear foot while switched
     out = {"lf": 45.0, "rf": -45.0}
     K[lead + "_yaw"] = [(0, 0 if lead == "lf" else out["rf"]), (21, 0 if lead == "lf" else out["rf"]), (e, 0 if lead == "lf" else out["rf"])]
@@ -691,6 +726,90 @@ for _k in list(DESIGNS):
     _u = copy.copy(DESIGNS[_k]); _u.unarmed = True
     _u.name = _k + "Unarmed"; _u.file = os.path.join("unarmed", DESIGNS[_k].file)
     DESIGNS[_u.name] = _u
+
+# ---- weapon grips (the owner, 2026-11-12: "now we need to add the weapon type anims for holding the weapons while
+# dodging") -----------------------------------------------------------------------------------------------------------
+# Each held-weapon type gets the eight step dodges with the arms, hands and weapon nodes of that type's VANILLA combat
+# idle (frame 0 of the game's own idle, read from Skyrim - Animations.bsa), held through the whole step. Every bone
+# from the clavicles out takes the idle's parent-local pose, so the arms ride the reworked spine lean; legs, pelvis and
+# spine are the step's own. One idle per side: a set that mixes (one-handed + shield) takes each arm from its own idle,
+# and the third value is the share of the second idle on that side (the shield carried half-raised, between the 1hm
+# idle and the block idle). The idles are the game's, so they are read from the unpacked archive
+# (SIMPLEDODGE_VANILLA_ANIMS, default ../_work/vanilla-anims/meshes/actors/character/animations); never shipped.
+VANILLA_ANIMS = os.environ.get("SIMPLEDODGE_VANILLA_ANIMS", os.path.join(os.path.dirname(HERE), "_work", "vanilla-anims",
+                               "meshes", "actors", "character", "animations"))
+GRIPS = {   # set folder: {side: (idle, second idle or None, share of the second)}
+    "OneHanded":          {"R": ("1hm_idle", None, 0.0), "L": ("1hm_idle", None, 0.0)},
+    "OneHandedShield":    {"R": ("1hm_idle", None, 0.0), "L": ("1hm_idle", "shd_blockidle", 0.5)},
+    "DualWield":          {"R": ("dw1hm1hmidle", None, 0.0), "L": ("dw1hm1hmidle", None, 0.0)},
+    "Greatsword":         {"R": ("2hm_idle", None, 0.0), "L": ("2hm_idle", None, 0.0)},
+    "BattleaxeWarhammer": {"R": ("2hw_idle", None, 0.0), "L": ("2hw_idle", None, 0.0)},
+    "Bow":                {"R": ("bow_idledrawn", None, 0.0), "L": ("bow_idledrawn", None, 0.0)},
+    "Crossbow":           {"R": ("dlc01/crossbow_idledrawn", None, 0.0), "L": ("dlc01/crossbow_idledrawn", None, 0.0)},
+    "Staff":              {"R": ("staffright_idle", None, 0.0), "L": ("staffright_idle", None, 0.0)},
+    "MagicRight":         {"R": ("mrh_idle", None, 0.0), "L": ("mrh_idle", None, 0.0)},
+    "MagicLeft":          {"R": ("mlh_idle", None, 0.0), "L": ("mlh_idle", None, 0.0)},
+    "MagicBoth":          {"R": ("dualmagic_idle", None, 0.0), "L": ("dualmagic_idle", None, 0.0)},
+}
+STEP_DIRS = ["Left", "Right", "Forward", "Back", "ForwardLeft", "ForwardRight", "BackLeft", "BackRight"]
+
+def _side_bones():
+    out = {"L": set(), "R": set()}
+    for side in "LR":
+        root = IDX[f"NPC {side} Clavicle [{side}Clv]"]
+        for i in range(len(BN)):
+            j = i
+            while j >= 0 and j != root: j = PAR[j]
+            if j == root: out[side].add(i)
+    return out
+
+_IDLE_CACHE = {}
+def idle_locals(name):
+    """Frame-0 parent-local (translation, rotation) per bone index of a vanilla idle (the bones it has tracks for)."""
+    if name in _IDLE_CACHE: return _IDLE_CACHE[name]
+    a = AS.load_skyrim_animation(os.path.join(VANILLA_ANIMS, *name.split("/")) + ".hkx")
+    out = {}
+    # an empty binding array means track i drives bone i (the game's own clips are written that way)
+    binding = list(a.track_to_bone_indices) or list(range(len(a.tracks)))
+    for tr, bi in enumerate(binding):
+        if bi < 0 or tr >= len(a.tracks): continue
+        t_, r_ = a.tracks[tr].translations[0], a.tracks[tr].rotations[0]
+        out[bi] = (Vector(t_), Quaternion((r_[3], r_[0], r_[1], r_[2])))
+    _IDLE_CACHE[name] = out
+    return out
+
+def grip_locals(spec):
+    """bone index -> local 4x4 for every bone from the clavicles out, per side, from that side's idle(s)."""
+    sides = _side_bones(); res = {}
+    for side, (a, b, w) in spec.items():
+        A = idle_locals(a); B = idle_locals(b) if b else None
+        for i in sides[side]:
+            if i not in A: continue
+            t_, q = A[i]
+            if B and i in B:
+                t_ = t_.lerp(B[i][0], w); q = q.slerp(B[i][1], w)
+            res[i] = Matrix.Translation(t_) @ q.to_matrix().to_4x4()
+    return res
+
+os.makedirs(os.path.join(OUT, "weapons"), exist_ok=True)
+for _set in list(GRIPS) + ["Dagger", "Warhammer"]:       # BEFORE: today's open-guard step, the same weapons in hand
+    for _k in STEP_DIRS:
+        _b = copy.copy(DESIGNS[_k]); _b.weapon_show = _set
+        _b.name = _k + _set + "Before"; _b.file = os.path.join("weapons", "_before", _set, DESIGNS[_k].file)
+        os.makedirs(os.path.join(OUT, "weapons", "_before", _set), exist_ok=True)
+        DESIGNS[_b.name] = _b
+for _set, _src in (("Dagger", "OneHanded"), ("Warhammer", "BattleaxeWarhammer")):   # same grip, other weapon mesh
+    for _k in STEP_DIRS:
+        _r = copy.copy(DESIGNS[_k]); _r.grip_set = _src; _r.grip_spec = GRIPS[_src]; _r.weapon_show = _set
+        _r.name = _k + _set; _r.file = os.path.join("weapons", "_review", _set, DESIGNS[_k].file)
+        os.makedirs(os.path.join(OUT, "weapons", "_review", _set), exist_ok=True)
+        DESIGNS[_r.name] = _r
+for _set, _spec in GRIPS.items():
+    os.makedirs(os.path.join(OUT, "weapons", _set), exist_ok=True)
+    for _k in STEP_DIRS:
+        _w = copy.copy(DESIGNS[_k]); _w.grip_set = _set; _w.grip_spec = _spec
+        _w.name = _k + _set; _w.file = os.path.join("weapons", _set, DESIGNS[_k].file)
+        DESIGNS[_w.name] = _w
 
 def ik2(s, t, l1, l2, pole):
     """Two-bone IK: joint position for root s, target t (clamped to reach), bending toward pole."""
@@ -840,6 +959,14 @@ def _solve_pose(D, f, dz=0.0):
         if i in delta:
             base = base @ (B0[i].transposed() @ delta[i] @ B0[i]).to_4x4()
         G[i] = base
+        grip = getattr(D, "grip_spec", None)
+        if grip is not None:
+            GL = D.__dict__.get("_grip_L")
+            if GL is None:
+                GL = D._grip_L = grip_locals(grip)
+            if i in GL:                       # arms, hands, weapon nodes: the weapon type's idle, riding the spine
+                G[i] = G[par] @ GL[i]
+                continue
         # legs
         for side in "LR":
             th, ca, fo, to = (IDX[f"NPC {side} Thigh [{side}Thg]"], IDX[f"NPC {side} Calf [{side}Clf]"],
@@ -1030,6 +1157,99 @@ def verify(D):
     say(json.dumps(out, indent=1))
 
 # ------------------------------------------------------------------------------------------------ render stage
+# (node, kind, along +Y from, to, thickness) per grip set; kind box / disc / ball
+PROXIES = {
+    "OneHanded":          [("Weapon", "box", -6, 80, 2.0)],
+    "OneHandedShield":    [("Weapon", "box", -6, 80, 2.0), ("Shield", "disc", 0, 0, 24.0)],
+    "DualWield":          [("Weapon", "box", -6, 80, 2.0), ("Shield", "box", -6, 80, 2.0)],
+    "Greatsword":         [("Weapon", "box", -14, 115, 2.5)],
+    "BattleaxeWarhammer": [("Weapon", "box", -20, 95, 2.5), ("Weapon", "head", 80, 98, 9.0)],
+    "Bow":                [("Weapon", "box", -60, 60, 2.5)],
+    "Crossbow":           [("Weapon", "box", -10, 55, 6.0)],
+    "Staff":              [("Weapon", "box", -45, 95, 2.5)],
+    "MagicRight":         [("NPC R MagicNode [RMag]", "ball", 0, 0, 5.0)],
+    "MagicLeft":          [("NPC L MagicNode [LMag]", "ball", 0, 0, 5.0)],
+    "MagicBoth":          [("NPC R MagicNode [RMag]", "ball", 0, 0, 5.0), ("NPC L MagicNode [LMag]", "ball", 0, 0, 5.0)],
+}
+
+# The game's own weapon meshes for the review renders (render only; never shipped): unpacked from Skyrim - Meshes0/1.bsa
+# into SIMPLEDODGE_VANILLA_MESHES (default ../_work/vanilla-meshes/meshes). Each nif is placed in its node's frame,
+# as the game attaches it. Spell hands have no mesh and keep the ball stand-in.
+VANILLA_MESHES = os.environ.get("SIMPLEDODGE_VANILLA_MESHES", os.path.join(os.path.dirname(HERE), "_work", "vanilla-meshes", "meshes"))
+WEAPON_MESHES = {
+    "OneHanded":          [("Weapon", "weapons/iron/longsword.nif")],
+    "Dagger":             [("Weapon", "weapons/iron/irondagger.nif")],
+    "OneHandedShield":    [("Weapon", "weapons/iron/longsword.nif"), ("Shield", "armor/iron/shield.nif")],
+    "DualWield":          [("Weapon", "weapons/iron/longsword.nif"), ("Shield", "weapons/iron/longsword.nif")],
+    "Greatsword":         [("Weapon", "weapons/iron/ironclaymore.nif")],
+    "BattleaxeWarhammer": [("Weapon", "weapons/iron/ironbattleaxe.nif")],
+    "Warhammer":          [("Weapon", "weapons/iron/warhammer.nif")],
+    "Bow":                [("Weapon", "weapons/iron/ironbow.nif")],
+    "Crossbow":           [("Weapon", "dlc01/weapons/crossbow/crossbow.nif")],
+    "Staff":              [("Weapon", "weapons/iron/tempironstaff.nif")],
+}
+
+def _import_nif_meshes(path):
+    before = set(bpy.data.objects)
+    for o in bpy.context.selected_objects: o.select_set(False)
+    bpy.context.view_layer.objects.active = None
+    bpy.ops.import_scene.pynifly(filepath=path, blender_xf=False, rename_bones=False, rename_bones_niftools=False,
+                                 rotate_bones_pretty=False, import_animations=False, import_collisions=False,
+                                 import_tris=False, import_shapekeys=False)
+    new = [o for o in bpy.data.objects if o not in before]
+    meshes = [o for o in new if o.type == 'MESH']
+    keep = []
+    for o in meshes:
+        mw = o.matrix_world.copy()
+        for m in list(o.modifiers): o.modifiers.remove(m)
+        o.parent = None; o.matrix_world = mw
+        keep.append(o)
+    for o in new:
+        if o not in keep: bpy.data.objects.remove(o)
+    return keep
+
+def add_weapon_proxies(D, arma):
+    show = getattr(D, "weapon_show", None) or getattr(D, "grip_set", None)
+    meshes = WEAPON_MESHES.get(show)
+    if meshes:
+        sc = bpy.context.scene; sc.frame_set(1)
+        for node, rel in meshes:
+            path = os.path.join(VANILLA_MESHES, *rel.split("/"))
+            if not os.path.exists(path): say("weapon mesh missing", path); continue
+            pb = arma.pose.bones[node]
+            W = arma.matrix_world @ pb.matrix
+            for o in _import_nif_meshes(path):
+                local = o.matrix_world.copy()
+                o.name = "Proxy_" + o.name
+                o.parent = arma; o.parent_type = 'BONE'; o.parent_bone = node
+                o.matrix_world = W @ local
+        return
+    spec = PROXIES.get(show)
+    if not spec: return
+    sc = bpy.context.scene; sc.frame_set(1)
+    mat = bpy.data.materials.new("weapon"); mat.diffuse_color = (0.30, 0.42, 0.62, 1)
+    for node, kind, a, b, th in spec:
+        if kind != "ball": continue          # only the spell hands still use stand-ins
+        pb = arma.pose.bones[node]
+        W = arma.matrix_world @ pb.matrix
+        if kind in ("box", "head"):
+            bpy.ops.mesh.primitive_cube_add(size=1)
+            o = bpy.context.object
+            sx, sz = (th, th) if kind == "box" else (th * 2.2, th * 0.6)
+            local = Matrix.Translation(Vector((0, (a + b) / 2, 0))) @ Matrix.Diagonal((sx, b - a, sz, 1))
+        elif kind == "disc":
+            bpy.ops.mesh.primitive_cylinder_add(radius=1, depth=1, vertices=32)
+            o = bpy.context.object
+            local = Matrix.Diagonal((th, th, 2.0, 1))
+        else:
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=1, segments=16, ring_count=8)
+            o = bpy.context.object
+            local = Matrix.Diagonal((th, th, th, 1))
+        o.name = "Proxy_" + node.replace(" ", "_")
+        o.parent = arma; o.parent_type = 'BONE'; o.parent_bone = node
+        o.matrix_world = W @ local
+        o.data.materials.clear(); o.data.materials.append(mat)
+
 def render(D):
     bpy.ops.wm.open_mainfile(filepath=os.path.join(OUT, f"{D.file}.blend"))
     NF = D.nf; T = D.root(NF - 1); C = T / 2
@@ -1073,6 +1293,9 @@ def render(D):
     nose = bpy.context.object; nose.name = "PreviewNose"
     nose.parent = arma; nose.parent_type = 'BONE'; nose.parent_bone = hb.name
     nose.matrix_world = Matrix.Translation(hw.translation + Vector((0, 8.2, 4.2))) @ Rax('X', -90).to_4x4()
+    # weapon stand-ins for the grip sets (render only; nothing ships): plain boxes and discs on the Weapon / Shield /
+    # magic nodes, the length along the node's +Y, so the carried weapon and any clipping through the body read
+    add_weapon_proxies(D, arma)
     # look: Workbench solid grey, neutral grey world, floor with a grid so foot plants read
     sc.render.engine = 'BLENDER_WORKBENCH'
     sh = sc.display.shading
@@ -1099,7 +1322,7 @@ def render(D):
     sh.color_type = 'MATERIAL'
     bodymat = bpy.data.materials.new("body"); bodymat.diffuse_color = (0.74, 0.71, 0.67, 1)
     for o in bpy.data.objects:
-        if o.type == 'MESH' and (o.parent == arma):
+        if o.type == 'MESH' and (o.parent == arma) and not o.name.startswith("Proxy_"):
             o.data.materials.clear(); o.data.materials.append(bodymat)
     nm = bpy.data.materials.new("nose"); nm.diffuse_color = (0.55, 0.35, 0.30, 1); nose.data.materials.clear(); nose.data.materials.append(nm)
     sc.render.resolution_x = 960; sc.render.resolution_y = 540; sc.render.film_transparent = False
@@ -1144,4 +1367,5 @@ if __name__ == "__main__":
     for d in dirs:
         for st in stages:
             {"build": build, "verify": verify, "render": render}[st](DESIGNS[d])
-    open(os.path.join(OUT, f"_log_{'_'.join(stages)}_{'_'.join(dirs)}.txt"), "w").write("\n".join(log))
+    _tag = '_'.join(dirs) if len(dirs) <= 4 else f"{dirs[0]}_and_{len(dirs) - 1}_more"   # a long list overran MAX_PATH
+    open(os.path.join(OUT, f"_log_{'_'.join(stages)}_{_tag}.txt"), "w").write("\n".join(log))

@@ -1,0 +1,234 @@
+{
+ "Left": {
+  "frames": 22,
+  "lead": "L",
+  "landing_frame": 15,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 50.5,
+   "at_landing": 52.5,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 2.0
+  },
+  "knee_flex": {
+   "at_landing": 53.2,
+   "deepest_after": 81.9
+  },
+  "knee_in": {
+   "at_landing_deg": 22.9,
+   "offset_toward_centre": 5.4
+  },
+  "lean": {
+   "max_before_landing": 21.0,
+   "counter_after_landing": -12.1,
+   "last_frame": 0.0,
+   "stance_raw": 5.0
+  }
+ },
+ "Right": {
+  "frames": 22,
+  "lead": "R",
+  "landing_frame": 15,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 50.5,
+   "at_landing": 52.5,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 2.0
+  },
+  "knee_flex": {
+   "at_landing": 52.4,
+   "deepest_after": 81.0
+  },
+  "knee_in": {
+   "at_landing_deg": 23.6,
+   "offset_toward_centre": 5.5
+  },
+  "lean": {
+   "max_before_landing": 23.9,
+   "counter_after_landing": -8.4,
+   "last_frame": 0.0,
+   "stance_raw": -5.0
+  }
+ },
+ "Forward": {
+  "frames": 27,
+  "lead": "L",
+  "landing_frame": 20,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 50.5,
+   "at_landing": 52.0,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 2.0
+  },
+  "knee_flex": {
+   "at_landing": 46.4,
+   "deepest_after": 78.8
+  },
+  "knee_in": {
+   "at_landing_deg": 36.2,
+   "offset_toward_centre": 8.0
+  },
+  "lean": {
+   "max_before_landing": 20.7,
+   "counter_after_landing": -9.8,
+   "last_frame": 0.0,
+   "stance_raw": -10.6
+  }
+ },
+ "Back": {
+  "frames": 25,
+  "lead": "R",
+  "landing_frame": 17,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 51.0,
+   "at_landing": 51.8,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 1.9
+  },
+  "knee_flex": {
+   "at_landing": 75.6,
+   "deepest_after": 84.1
+  },
+  "knee_in": {
+   "at_landing_deg": 24.4,
+   "offset_toward_centre": 7.6
+  },
+  "lean": {
+   "max_before_landing": 21.5,
+   "counter_after_landing": -8.7,
+   "last_frame": 0.0,
+   "stance_raw": 10.6
+  }
+ },
+ "ForwardLeft": {
+  "frames": 22,
+  "lead": "L",
+  "landing_frame": 15,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 49.3,
+   "at_landing": 49.9,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 2.0
+  },
+  "knee_flex": {
+   "at_landing": 47.1,
+   "deepest_after": 86.9
+  },
+  "knee_in": {
+   "at_landing_deg": 32.4,
+   "offset_toward_centre": 7.3
+  },
+  "lean": {
+   "max_before_landing": 23.4,
+   "counter_after_landing": -9.0,
+   "last_frame": 0.0,
+   "stance_raw": -4.0
+  }
+ },
+ "ForwardRight": {
+  "frames": 27,
+  "lead": "R",
+  "landing_frame": 21,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 50.5,
+   "at_landing": 52.0,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 1.9
+  },
+  "knee_flex": {
+   "at_landing": 66.2,
+   "deepest_after": 85.4
+  },
+  "knee_in": {
+   "at_landing_deg": 26.3,
+   "offset_toward_centre": 7.6
+  },
+  "lean": {
+   "max_before_landing": 26.0,
+   "counter_after_landing": -8.3,
+   "last_frame": 0.0,
+   "stance_raw": -11.0
+  }
+ },
+ "BackLeft": {
+  "frames": 27,
+  "lead": "L",
+  "landing_frame": 21,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 50.5,
+   "at_landing": 52.0,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 2.0
+  },
+  "knee_flex": {
+   "at_landing": 54.7,
+   "deepest_after": 82.6
+  },
+  "knee_in": {
+   "at_landing_deg": 24.1,
+   "offset_toward_centre": 5.8
+  },
+  "lean": {
+   "max_before_landing": 17.6,
+   "counter_after_landing": -13.9,
+   "last_frame": 0.0,
+   "stance_raw": 11.0
+  }
+ },
+ "BackRight": {
+  "frames": 22,
+  "lead": "R",
+  "landing_frame": 15,
+  "pelvis_z": {
+   "stance": 64.5,
+   "lowest": 49.3,
+   "at_landing": 49.9,
+   "highest_after_frame0": 64.5
+  },
+  "contact": {
+   "both_feet_off_frames": 0,
+   "max_toe_rise": 2.0
+  },
+  "knee_flex": {
+   "at_landing": 67.8,
+   "deepest_after": 91.1
+  },
+  "knee_in": {
+   "at_landing_deg": 20.5,
+   "offset_toward_centre": 5.8
+  },
+  "lean": {
+   "max_before_landing": 21.7,
+   "counter_after_landing": -12.0,
+   "last_frame": 0.0,
+   "stance_raw": 4.0
+  }
+ }
+}
