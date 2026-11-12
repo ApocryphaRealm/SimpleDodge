@@ -14,6 +14,7 @@ struct MOD
 	inline static constexpr RE::FormID DUMMY_SPELL_LOCK_PERK_FORMID = 0x801;
 	inline static constexpr RE::FormID DUMMY_DODGE_SPELL_FORMID = 0x802;
 	inline static constexpr RE::FormID DODGE_PERK_DUMMY_FORMID = 0x800;
+	inline static constexpr RE::FormID NO_STAMINA_REGEN_SPELL_FORMID = 0x804;  // SDG_NoStaminaRegenSpell (1.2.0)
 
 	inline static constexpr std::string_view USED_AV = "DodgeCostModifier";
 	inline static constexpr std::string_view EXTRA_DODGE_AV = "ExtraDodgeCostModifier";

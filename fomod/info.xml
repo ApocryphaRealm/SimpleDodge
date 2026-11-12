@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fomod>
+	<Name>Simple Dodge</Name>
+	<Author>ApocryphaRealm</Author>
+	<Version>1.1.0</Version>
+	<Website>https://github.com/ApocryphaRealm/SimpleDodge</Website>
+	<Description>Pick the build for your Skyrim version (SE 1.5.97 / AE 1.6.1170, or Skyrim 1.7.99 / 1.7.104) and the step distance (normal or shorter).</Description>
+</fomod>

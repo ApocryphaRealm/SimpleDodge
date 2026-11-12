@@ -89,7 +89,8 @@ namespace Config
 			a_fn(S::dodge_cost); a_fn(S::dodge_key); a_fn(S::use_sprint_key); a_fn(S::use_mco_recover_window);
 			a_fn(S::use_perk_lock); a_fn(S::use_percentage_cost); a_fn(S::remove_forward); a_fn(S::eight_way);
 			a_fn(S::directional_double_tap); a_fn(S::long_roll); a_fn(S::dodge_when_sheathed);
-			a_fn(S::dodge_perk_ID); a_fn(S::on_dodge_spell_ID); a_fn(S::on_dodge_spell_perk_ID);
+			a_fn(S::no_stamina_regen_during_dodge); a_fn(S::dodge_sound); a_fn(S::menu_exit_grace);
+			a_fn(S::dodge_perk_ID); a_fn(S::on_dodge_spell_ID); a_fn(S::on_dodge_spell_perk_ID); a_fn(S::dodge_sound_ID);
 			a_fn(S::log_level);
 		}
 	}
@@ -235,6 +236,12 @@ namespace Config
 		if (auto* f = resolve(Settings::on_dodge_spell_ID.GetValue(), "on-dodge spell")) {
 			onDodgeSpell = f->As<RE::SpellItem>();
 			logger::info("Forms: on-dodge spell is {}", onDodgeSpell ? onDodgeSpell->GetName() : "(not a spell)");
+		}
+		NoStaminaRegenSpell = dh->LookupForm<RE::SpellItem>(NO_STAMINA_REGEN_SPELL_FORMID, MOD_NAME);
+		logger::debug("Forms: no-stamina-regen spell {}", NoStaminaRegenSpell ? "found" : "MISSING (Simple Dodge.esp older than 1.2.0?)");
+		if (auto* f = resolve(Settings::dodge_sound_ID.GetValue(), "dodge sound")) {
+			DodgeSound = f->As<RE::BGSSoundDescriptorForm>();
+			logger::info("Forms: dodge sound is {:08X}{}", f->GetFormID(), DodgeSound ? "" : " (not a sound descriptor)");
 		}
 		TDMGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>("TDM_DirectionalMovement");
 		logger::debug("Forms: True Directional Movement global {}", TDMGlobal ? "found" : "not present");

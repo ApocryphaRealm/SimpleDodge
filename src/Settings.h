@@ -67,6 +67,12 @@ namespace Config
 		// weapons-away graph (mt_behavior); off keeps the 1.1.0 behaviour - a sheathed dodge is refused here, before
 		// stamina or the event, instead of being sent to a graph state with no dodge in it.
 		inline static Value<bool>        dodge_when_sheathed{ "Settings", "bDodgeWhenSheathed", false };
+		// No stamina regen while the player dodges (1.2.0, the owner, 2026-11-12): Simple Dodge.esp's
+		// SDG_NoStaminaRegenSpell (0x804, StaminaRateMult -100 for 3 s) is cast on TKDR_DodgeStart and dispelled on
+		// TKDR_DodgeEnd; the 3 s duration is the safety net if the end event never comes.
+		inline static Value<bool>        no_stamina_regen_during_dodge{ "Settings", "bNoStaminaRegenDuringDodge", false };
+		// A short whoosh when the player's dodge starts (1.2.0). The sound is sDodgeSoundID in [Forms].
+		inline static Value<bool>        dodge_sound{ "Settings", "bDodgeSound", false };
 		// How long after a menu CLOSES a dodge key press is ignored, in seconds.
 		//
 		// The menu-open check is not enough on its own: the press that closes a menu is delivered to gameplay in the
@@ -80,6 +86,8 @@ namespace Config
 		inline static Value<std::string> dodge_perk_ID{ "Forms", "sDodgeRequiredPerkID", std::string("Simple Dodge.esp|0x800") };
 		inline static Value<std::string> on_dodge_spell_ID{ "Forms", "sOnDodgeSpellID", std::string("Simple Dodge.esp|0x802") };
 		inline static Value<std::string> on_dodge_spell_perk_ID{ "Forms", "sOnDodgeSpellRequiredPerkID", std::string("Simple Dodge.esp|0x801") };
+		// Sound descriptor (SNDR) for bDodgeSound. Default: Skyrim.esm WPNSwingUnarmed (0x0C06D1), the bare-hand swing.
+		inline static Value<std::string> dodge_sound_ID{ "Forms", "sDodgeSoundID", std::string("Skyrim.esm|0xC06D1") };
 
 		// [Debug]
 		inline static Value<std::uint32_t> log_level{ "Debug", "uLogLevel", 2u };  // 2 = info (project default, rule 14)
@@ -102,6 +110,8 @@ namespace Config
 		inline static RE::BGSPerk*   SpellLockPerk = nullptr;
 		inline static RE::BGSPerk*   ActualDodgePerk = nullptr;
 		inline static RE::TESGlobal* TDMGlobal = nullptr;
+		inline static RE::SpellItem* NoStaminaRegenSpell = nullptr;
+		inline static RE::BGSSoundDescriptorForm* DodgeSound = nullptr;
 
 		inline static const std::vector<std::string> MenuNames{
 			std::string(RE::BarterMenu::MENU_NAME),    std::string(RE::BookMenu::MENU_NAME),     std::string(RE::Console::MENU_NAME),

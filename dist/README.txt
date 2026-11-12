@@ -2,7 +2,7 @@ Simple Dodge
 Version 1.0.0
 
 WHAT IT IS
-An SKSE dodge for Skyrim SE 1.5.97, AE 1.6.1170 and Skyrim 1.7.x. Tap Sprint (or a dodge key, or Sneak) with a direction held and your character steps out of the way: a weighted step with the guard up, or a roll if you prefer. Eight directions, dodge in place, double tap if you want it (of the dodge key, or of a direction), a long roll, a stamina cost (flat or a share of max stamina), invincibility frames, attack cancel (light attacks only if you like, or only in the MCO/BFCO recovery window), dodge while sneaking, dodge with weapons sheathed (off by default), an optional perk lock and an on-dodge spell. Its own step dodges, diagonals, rolls and an open-hand unarmed set are included. Settings are on a menu page and in Simple Dodge.ini, in eleven languages.
+An SKSE dodge for Skyrim SE 1.5.97, AE 1.6.1170 and Skyrim 1.7.x. Tap Sprint (or a dodge key, or Sneak) with a direction held and your character steps out of the way: a weighted step with the guard up, or a roll if you prefer. Eight directions, dodge in place, double tap if you want it (of the dodge key, or of a direction), a long roll, a stamina cost (flat or a share of max stamina), invincibility frames, attack cancel (light attacks only if you like, or only in the MCO/BFCO recovery window), dodge while sneaking, dodge with weapons sheathed (off by default), no stamina regen during a dodge and a dodge sound (both off by default), a shorter step distance to pick in the installer, an optional perk lock and an on-dodge spell. Its own step dodges, diagonals, rolls and an open-hand unarmed set are included. Settings are on a menu page and in Simple Dodge.ini, in eleven languages.
 
 REQUIREMENTS
 - SKSE (SKSE 2.3.x for Skyrim 1.7.x)

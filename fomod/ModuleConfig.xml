@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+	<moduleName>Simple Dodge</moduleName>
+	<requiredInstallFiles>
+		<folder source="Common" destination="" priority="0" />
+	</requiredInstallFiles>
+	<installSteps order="Explicit">
+		<installStep name="Which Skyrim do you have?">
+			<optionalFileGroups order="Explicit">
+				<group name="Game version" type="SelectExactlyOne">
+					<plugins order="Explicit">
+						<plugin name="Skyrim SE 1.5.97 or AE 1.6.1170">
+							<description>For Skyrim Special Edition 1.5.97 and Anniversary Edition 1.6.1170. Built on CommonLibSSE-NG 3.7.0, which reads Address Library formats 1 and 2.</description>
+							<files>
+								<folder source="Line-SE-AE16" destination="" priority="0" />
+							</files>
+							<typeDescriptor>
+								<dependencyType>
+									<defaultType name="Recommended" />
+									<patterns>
+										<pattern>
+											<dependencies operator="And"><gameDependency version="1.7.0.0" /></dependencies>
+											<type name="Optional" />
+										</pattern>
+									</patterns>
+								</dependencyType>
+							</typeDescriptor>
+						</plugin>
+						<plugin name="Skyrim 1.7.99 / 1.7.104 (current Steam version)">
+							<description>For Skyrim 1.7.99 and 1.7.104. Needs SKSE 2.3.x and Address Library All-in-One v13 or newer. Built on CommonLibSSE-NG 7.2.0; this DLL is distributed under GPL-3.0-or-later (licence texts install with it).</description>
+							<files>
+								<folder source="Line-17" destination="" priority="0" />
+							</files>
+							<typeDescriptor>
+								<dependencyType>
+									<defaultType name="Optional" />
+									<patterns>
+										<pattern>
+											<dependencies operator="And"><gameDependency version="1.7.0.0" /></dependencies>
+											<type name="Recommended" />
+										</pattern>
+									</patterns>
+								</dependencyType>
+							</typeDescriptor>
+						</plugin>
+					</plugins>
+				</group>
+			</optionalFileGroups>
+		</installStep>
+		<installStep name="Step distance">
+			<optionalFileGroups order="Explicit">
+				<group name="Step distance" type="SelectExactlyOne">
+					<plugins order="Explicit">
+						<plugin name="Normal">
+							<description>Step dodges travel their full distance: forward about 409 units, back 300, to the side about 251.</description>
+							<typeDescriptor>
+								<type name="Recommended" />
+							</typeDescriptor>
+						</plugin>
+						<plugin name="Shorter">
+							<description>Shorter step dodges: forward 70% (about 287 units), back 60% (180), to the side 80% (about 201); the diagonals by the same mix. The standard roll uses the same distances, so it is shorter too; the long roll is not changed. Run Nemesis or Pandora after installing.</description>
+							<files>
+								<folder source="Step-Shorter" destination="" priority="1" />
+							</files>
+							<typeDescriptor>
+								<type name="Optional" />
+							</typeDescriptor>
+						</plugin>
+					</plugins>
+				</group>
+			</optionalFileGroups>
+		</installStep>
+	</installSteps>
+</config>

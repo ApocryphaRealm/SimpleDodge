@@ -3,9 +3,14 @@
 ## 1.2.0 - 2026-11-12 - untested
 
 ### Added
+- Dodge sound (off by default; bDodgeSound): a short whoosh when your dodge starts. The sound is sDodgeSoundID in the INI, by default the game's bare-hand swing (Skyrim.esm WPNSwingUnarmed).
+- No stamina regen during a dodge (off by default; bNoStaminaRegenDuringDodge). Stamina does not refill from the start of your dodge to its end, through a hidden effect in Simple Dodge.esp that lasts at most 3 seconds.
+- Step distance in the installer: Normal, or Shorter (forward 70%, back 60%, sideways 80%, diagonals by the same mix - the distances of TK Dodge Shorter Step Distance). The standard roll shares the step distances, so it is shorter too; the long roll is unchanged. Run Nemesis or Pandora after installing.
 - Dodge with weapons sheathed (off by default; on the settings page, or bDodgeWhenSheathed in the INI). The behaviour patch now puts every dodge - step dodges, rolls, long rolls and diagonals - into the weapons-away animations too, in third and first person, and the open-hand unarmed set plays while weapons are sheathed. With it off, a dodge with weapons sheathed is refused at once, before any stamina is spent. Needs Nemesis or Pandora run again.
 
 ### Fixed
+- fMenuExitGrace (how long a dodge press is ignored after a menu closes) is now read from and saved to the INI; it was always 0.25 s.
+- A DodgeCostModifier or ExtraDodgeCostModifier actor value that reads 0 or less (defined by another mod's Actor Value Generator file, such as TK Dodge RE Addon's) no longer makes dodges free; it counts as 1, and the log says so once.
 - Without Perk Entry Point Extender (it is optional), the log no longer prints a critical 'PerkEntryPointExtender.dll not found' line several times on every dodge press; it says once, at info level, that perks cannot change the dodge cost or invincibility time without it.
 
 ## 1.1.0 - 2026-11-12 - untested

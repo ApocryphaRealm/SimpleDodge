@@ -253,6 +253,8 @@ namespace Menu
 		Switch("SDG_EightWay", "Eight-way dodging", S::eight_way, "SDG_HelpEightWay", "Diagonal directions get their own dodge. Off: the four main directions only. Needs Pandora run again.");
 		Switch("SDG_Sheathed", "Dodge with weapons sheathed", S::dodge_when_sheathed, "SDG_HelpSheathed",
 			"Dodge while your weapons are put away. Off: draw a weapon or spell to dodge. Needs Nemesis or Pandora run again.");
+		Switch("SDG_Sound", "Dodge sound", S::dodge_sound, "SDG_HelpSound",
+			"A short whoosh when your dodge starts. The sound is set in the INI (sDodgeSoundID).");
 		Switch("SDG_NoThird", "Only in first person", S::disable_in_third, "SDG_HelpNoThird", "Turns dodging off in third person.");
 		Slider("SDG_IFrames", "Invincibility time", S::i_frame_duration, 0.0F, 3.0F, "%.2f s", 0.05F, "SDG_HelpIFrames",
 			"How long you cannot be hit after a dodge starts. Needs IFrame Generator RE. Animations with their own i-frame annotations ignore this.");
@@ -270,6 +272,8 @@ namespace Menu
 		ImGuiMCP::SeparatorText(strings::TR("SDG_SecStamina", "Stamina"));
 		Slider("SDG_Cost", "Dodge cost", S::dodge_cost, 0.0F, 100.0F, "%.1f", 1.0F, "SDG_HelpCost", "Stamina each dodge uses (or percent of max stamina, below).");
 		Switch("SDG_Percent", "Cost is a percentage of max stamina", S::use_percentage_cost, "SDG_HelpPercent", "Treats the dodge cost as a percentage instead of a flat amount.");
+		Switch("SDG_NoRegen", "No stamina regen during a dodge", S::no_stamina_regen_during_dodge, "SDG_HelpNoRegen",
+			"Stamina does not refill while you dodge.");
 
 		ImGuiMCP::SeparatorText(strings::TR("SDG_SecAttacks", "Attacks and sneaking"));
 		Switch("SDG_Cancel", "Dodge cancels attacks", S::enable_dodge_attack_cancel, "SDG_HelpCancel", "A dodge can interrupt your attack.");

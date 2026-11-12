@@ -39,6 +39,13 @@ RE::BSEventNotifyControl animEventHandler::HookedProcessEvent(RE::BSAnimationGra
     if (a_event.tag == "TKDR_DodgeStart") {
         if (player)
             Dodge::ApplyDodgeCostActor(player);
+        // 1.2.0 additions act on the player's own dodge only (the sink also sees other actors' graph events)
+        if (player && a_event.holder == player)
+            Dodge::OnDodgeStart(player);
+    }
+    if (a_event.tag == "TKDR_DodgeEnd") {
+        if (player && a_event.holder == player)
+            Dodge::OnDodgeEnd(player);
     }
 
     if (a_event.tag == "MCO_AttackInitiate" ||a_event.tag == "MCO_PowerAttackInitiate" || a_event.tag == "MCO_attackEnterNotify")

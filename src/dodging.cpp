@@ -190,13 +190,29 @@ float CalculateDodgeCost(RE::Actor* a_actor)
     const auto cost_modifierAV  = Compat::LookupActorValueByName(MOD::USED_AV);
     const auto stag_cost_mod_AV = Compat::LookupActorValueByName(MOD::EXTRA_DODGE_AV);
 
+    // These two actor values exist only when another mod's Actor Value Generator toml defines them (TK Dodge RE Addon
+    // ships DodgeCostModifier_AVG.toml). A definition whose value reads 0 or less made every dodge free, or negative.
+    // Such a value is treated as 1 (no change), and said once per actor value.
+    auto guarded = [a_actor](RE::ActorValue a_av, std::string_view a_name, bool& a_warned) {
+        const float v = a_actor->AsActorValueOwner()->GetActorValue(a_av);
+        if (v > 0.0f)
+            return v;
+        if (!a_warned)
+        {
+            a_warned = true;
+            logger::warn("Dodge cost: actor value {} reads {} - another mod's Actor Value Generator toml defines it "
+                         "(e.g. TK Dodge RE Addon's DodgeCostModifier_AVG.toml). Using 1 instead.", a_name, v);
+        }
+        return 1.0f;
+    };
+    static bool warnedCost = false, warnedExtra = false;
     if (cost_modifierAV != RE::ActorValue::kNone)
     {
-        dodgeCostModifier = a_actor->AsActorValueOwner()->GetActorValue(cost_modifierAV);
+        dodgeCostModifier = guarded(cost_modifierAV, MOD::USED_AV, warnedCost);
     }
     if (stag_cost_mod_AV != RE::ActorValue::kNone)
     {
-        extraDodgeCostMod = a_actor->AsActorValueOwner()->GetActorValue(stag_cost_mod_AV);
+        extraDodgeCostMod = guarded(stag_cost_mod_AV, MOD::EXTRA_DODGE_AV, warnedExtra);
     }
     float dodge_cost = Config::Settings::dodge_cost.GetValue();
     float cost       = dodge_cost;
@@ -612,6 +628,71 @@ bool DoDodge(RE::Actor* a_actor)
     a_actor->SetGraphVariableFloat("TKDR_IframeDuration",
                                    iFrames); // Set invulnerable frame duration
     return a_actor->NotifyAnimationGraph(dodge_event);
+}
+
+void OnDodgeStart(RE::Actor* a_actor)
+{
+    if (!a_actor)
+        return;
+    if (Config::Settings::no_stamina_regen_during_dodge.GetValue())
+    {
+        if (auto* spell = Config::Forms::NoStaminaRegenSpell)
+        {
+            Compat::ApplySpell(a_actor, a_actor, spell);
+            logger::debug("Dodge start: stamina regen blocked (SDG_NoStaminaRegenSpell)");
+        }
+        else
+        {
+            static bool warned = false;
+            if (!warned)
+            {
+                warned = true;
+                logger::warn("No stamina regen during dodge is on, but Simple Dodge.esp has no SDG_NoStaminaRegenSpell "
+                             "(0x804) - install the 1.2.0 plugin.");
+            }
+        }
+    }
+    if (Config::Settings::dodge_sound.GetValue())
+    {
+        auto* sound = Config::Forms::DodgeSound;
+        auto* audio = RE::BSAudioManager::GetSingleton();
+        if (sound && audio)
+        {
+            RE::BSSoundHandle handle;
+#if RUNTIME_LINE == 17
+            const bool built = audio->GetSoundHandle(handle, sound);
+#else
+            const bool built = audio->BuildSoundDataFromDescriptor(handle, sound);
+#endif
+            if (built)
+            {
+                if (auto* node = a_actor->Get3D())
+                    handle.SetObjectToFollow(node);
+                const bool played = handle.Play();
+                logger::debug("Dodge start: sound {:08X} {}", sound->GetFormID(), played ? "played" : "did not play");
+            }
+            else
+            {
+                logger::debug("Dodge start: no sound handle for {:08X}", sound->GetFormID());
+            }
+        }
+    }
+}
+
+void OnDodgeEnd(RE::Actor* a_actor)
+{
+    if (!a_actor)
+        return;
+    // Dispelled whatever the setting says now, so a switch turned off mid-dodge leaves nothing behind.
+    if (auto* spell = Config::Forms::NoStaminaRegenSpell)
+    {
+        if (auto* target = a_actor->AsMagicTarget())
+        {
+            auto handle = a_actor->GetHandle();
+            if (target->DispelEffect(spell, handle))
+                logger::debug("Dodge end: stamina regen restored");
+        }
+    }
 }
 
 void ClearBuffer()

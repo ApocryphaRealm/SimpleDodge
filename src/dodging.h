@@ -200,6 +200,8 @@ float CalculateDodgeCost(RE::Actor* a_actor);
 void ApplyDodgeCostActor(RE::Actor* a_actor);
 DodgeEventResult GetDodgeEvent(std::string& a_event);
 void CastOnDodgeSpell(RE::Actor* a_actor);
+void OnDodgeStart(RE::Actor* a_actor); // the player's TKDR_DodgeStart: no-regen spell, dodge sound
+void OnDodgeEnd(RE::Actor* a_actor);   // the player's TKDR_DodgeEnd: dispel the no-regen spell
 
 
 } // namespace Dodge
