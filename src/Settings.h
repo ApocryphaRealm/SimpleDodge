@@ -73,6 +73,10 @@ namespace Config
 		inline static Value<bool>        no_stamina_regen_during_dodge{ "Settings", "bNoStaminaRegenDuringDodge", false };
 		// A short whoosh when the player's dodge starts (1.2.0). The sound is sDodgeSoundID in [Forms].
 		inline static Value<bool>        dodge_sound{ "Settings", "bDodgeSound", false };
+		// Chain a step dodge into a roll (1.2.0, the owner 2026-11-12): a dodge press during a step dodge, once
+		// fChainWindowStart of the step has played, rolls in the newly pressed direction. Once per chain.
+		inline static Value<bool>        chain_step_to_roll{ "Settings", "bChainStepToRoll", false };
+		inline static Value<float>       chain_window_start{ "Settings", "fChainWindowStart", 0.40F };
 		// How long after a menu CLOSES a dodge key press is ignored, in seconds.
 		//
 		// The menu-open check is not enough on its own: the press that closes a menu is delivered to gameplay in the

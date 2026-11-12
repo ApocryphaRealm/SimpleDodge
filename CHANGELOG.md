@@ -3,6 +3,7 @@
 ## 1.2.0 - 2026-11-12 - untested
 
 ### Added
+- Chain a step into a roll (off by default; bChainStepToRoll, fChainWindowStart): press dodge again once the step has played past the window (40% by default) and it becomes a roll in the newly pressed direction, charged like any dodge. Once per chain - a roll never chains, a press before the window does nothing. Needs Nemesis or Pandora run again.
 - Step dodges hold your weapon: eleven sets through Open Animation Replacer, each holding that weapon type's own combat grip through all eight directions - one-handed weapons and daggers (left hand empty or a torch), one-handed with a shield, dual wield, greatsword, battleaxe and warhammer, bow, crossbow, staff, and spells in the right, left or both hands. Used only with the weapon drawn; rolls are shared.
 - Dodge sound (off by default; bDodgeSound): a short whoosh when your dodge starts. The sound is sDodgeSoundID in the INI, by default the game's bare-hand swing (Skyrim.esm WPNSwingUnarmed).
 - No stamina regen during a dodge (off by default; bNoStaminaRegenDuringDodge). Stamina does not refill from the start of your dodge to its end, through a hidden effect in Simple Dodge.esp that lasts at most 3 seconds.
@@ -16,6 +17,7 @@
 - Without Perk Entry Point Extender (it is optional), the log no longer prints a critical 'PerkEntryPointExtender.dll not found' line several times on every dodge press; it says once, at info level, that perks cannot change the dodge cost or invincibility time without it.
 
 ### Changed
+- Every roll is now the forward roll: the body turns at once to the direction you push (stick or keys, relative to the camera, diagonals included) and rolls forward that way. Dodging in place rolls straight ahead. Step dodges keep their eight directional clips. The back, left and right roll clips stay in the package for roll packs but are no longer played.
 - Step dodges are a heavy, grounded step instead of a hop: one foot stays on the floor the whole way (the lead foot skims no more than 2 units up, the push foot slides behind until the lead foot has landed), the body never rises above its stance, the trunk leans 20-26 degrees into the dodge, and it rocks back past upright as the lead knee takes the landing before settling.
 - Step dodges reworked, all eight directions and the open-hand unarmed set: the body stays lower through the step, the trunk leans into the direction of the dodge and is upright again after landing, and the leg you land on arrives bent with its knee turned in toward the body, then sinks deeper to absorb the landing before rising back. Clip lengths, events and travel are unchanged.
 

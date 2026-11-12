@@ -18,9 +18,9 @@
 			<hkparam name="wrapAroundStateId">false</hkparam>
 			<hkparam name="maxSimultaneousTransitions">32</hkparam>
 			<hkparam name="startStateMode">START_STATE_MODE_DEFAULT</hkparam>
-			<hkparam name="selfTransitionMode">SELF_TRANSITION_MODE_NO_TRANSITION</hkparam>
+			<hkparam name="selfTransitionMode">SELF_TRANSITION_MODE_BLEND</hkparam>
 			<hkparam name="states" numelements="8">
 				#sdge$41 #sdge$32 #sdge$23 #sdge$14 #sdge$73 #sdge$81 #sdge$89 #sdge$97
 			</hkparam>
-			<hkparam name="wildcardTransitions">null</hkparam>
+			<hkparam name="wildcardTransitions">#sdge$102</hkparam>
 		</hkobject>

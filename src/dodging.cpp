@@ -3,6 +3,7 @@
 #include "utils/Logger.h"
 
 #include "API/PerkEntryPointExtenderAPI.h"
+#include "RollHeading.h"
 #include "Settings.h"
 #include "Utility.h"
 #include "mod-data.h"
@@ -16,6 +17,62 @@ static Tap::DoubleTap dodgeDoubleTap;
 // Direction of a directional double tap, used only when no movement is held by the time the dodge fires.
 static bool g_hasForcedDirection = false;
 static RE::NiPoint2 g_forcedDirection{};
+// The direction the last GetDodgeEvent read (x right, y forward, camera-relative), for turning a roll (1.2.0).
+static bool g_hasInput = false;
+static RE::NiPoint2 g_input{};
+
+// The player's dodge in progress (1.2.0, step-to-roll chain): what it is, when it started and how long its clip is.
+struct CurrentDodge
+{
+    using Clock = std::chrono::steady_clock;
+    bool active = false;
+    bool step = false;          // a step dodge, so a chain may follow
+    bool chained = false;       // a chained roll: nothing may chain from it
+    Clock::time_point start{};
+    float duration = 0.8f;      // the clip's length in seconds
+    Clock::time_point chargedAt{};   // a chained roll charged its own stamina here
+};
+static CurrentDodge g_cur;
+
+// Clip lengths of the step dodges (third person; the motion data's durations), by event.
+static float StepDuration(const std::string& a_event)
+{
+    if (a_event == "TKDodgeForward" || a_event == "TKDodgeForwardRight" || a_event == "TKDodgeBackLeft") return 0.866667f;
+    if (a_event == "TKDodgeBack") return 0.8f;
+    return 0.7f;   // Left, Right, ForwardLeft, BackRight
+}
+
+// Every roll is the forward roll, the body turned first to where the stick points (1.2.0, item 9). The input is
+// camera-relative: the camera's yaw is the player's heading, plus the third-person orbit offset while free rotation is
+// on (weapon sheathed). Dodge in place (no input) rolls straight ahead, no turn.
+static void TurnForRoll(RE::Actor* a_actor)
+{
+    if (!a_actor || !g_hasInput)
+        return;
+    float camYaw = a_actor->data.angle.z;
+    if (auto* cam = RE::PlayerCamera::GetSingleton(); cam && cam->IsInThirdPerson() && cam->currentState)
+    {
+        auto* tps = static_cast<RE::ThirdPersonState*>(cam->currentState.get());
+        if (tps && tps->freeRotationEnabled)
+            camYaw += tps->freeRotation.x;
+    }
+    const float from = a_actor->data.angle.z;
+    const float target = RollHeading::Target(camYaw, g_input.x, g_input.y);
+    a_actor->SetHeading(target);
+    logger::debug("Roll: turned from {:.2f} to {:.2f} (camera {:.2f}, input {:.2f},{:.2f})", from, target, camYaw,
+                  g_input.x, g_input.y);
+}
+
+static int RollStep(RE::Actor* a_actor)
+{
+    if (Config::Settings::long_roll.GetValue())
+    {
+        int ready = 0;
+        if (a_actor->GetGraphVariableInt("iSDGLongRoll", ready) && ready == 1)
+            return 4;
+    }
+    return 0;
+}
 
 // Perk Entry Point Extender is OPTIONAL. Its API header looks the DLL up on every call and logs a critical line each
 // time it is missing - several per dodge press, which a player read as the reason the dodge failed (Discord report,
@@ -84,10 +141,81 @@ void OnDirectionalDoubleTap(RE::NiPoint2 a_dir)
     g_hasForcedDirection = true;
 }
 
+// A dodge press while the player's dodge plays (1.2.0, bChainStepToRoll): a step, once fChainWindowStart of it has
+// played, becomes a roll in the newly pressed direction - turn, then the forward roll (graph event SDGChainRoll). Once per
+// chain: a chained roll, or a roll, chains to nothing. A press before the window is dropped, not held for it.
+static bool TryChain(RE::Actor* a_actor)
+{
+    using Clock = CurrentDodge::Clock;
+    const float played = std::chrono::duration<float>(Clock::now() - g_cur.start).count();
+    if (!g_cur.step || g_cur.chained)
+    {
+        logger::debug("Chain: refused - {}", g_cur.chained ? "already chained once" : "a roll does not chain");
+        return false;
+    }
+    if (played < Config::Settings::chain_window_start.GetValue() * g_cur.duration)
+    {
+        logger::debug("Chain: press at {:.2f}s, before the window ({:.2f}s) - ignored", played,
+                      Config::Settings::chain_window_start.GetValue() * g_cur.duration);
+        return false;
+    }
+    if (const auto res = GetDodgeResult(a_actor, true); res != DodgeResult::kSuccess)
+    {
+        logger::debug("Chain failed because of: {}", DodgeResultToString(res));
+        return false;
+    }
+    std::string ev;
+    if (GetDodgeEvent(ev) == DodgeEventResult::kForwardBlocked)
+        return false;
+    const int iStep = RollStep(a_actor);
+    a_actor->SetGraphVariableInt("iStep", iStep);
+    TurnForRoll(a_actor);
+    float iFrames = std::clamp(Config::Settings::i_frame_duration.GetValue(), 0.0f, 3.0f);
+    a_actor->SetGraphVariableFloat("TKDR_IframeDuration", iFrames);
+    if (!a_actor->NotifyAnimationGraph("SDGChainRoll"))
+    {
+        static bool warned = false;
+        if (!warned)
+        {
+            warned = true;
+            logger::warn("Chain: the behaviour has no SDGChainRoll - run Nemesis or Pandora again with Simple Dodge ticked");
+        }
+        return false;
+    }
+    // The chained roll stays inside the dodge state, so no new TKDR_DodgeStart comes: charge it here, through the
+    // normal path (stamina was checked above), and run the start actions (no-regen spell, sound).
+    ApplyDodgeCostActor(a_actor);
+    OnDodgeStart(a_actor);
+    g_cur.chargedAt = Clock::now();
+    g_cur.step = false;
+    g_cur.chained = true;
+    g_cur.start = Clock::now();
+    logger::debug("Chain: step -> {} (iStep {})", iStep == 4 ? "long roll" : "roll", iStep);
+    return true;
+}
+
+bool ChargeOnDodgeStart()
+{
+    return std::chrono::duration<float>(CurrentDodge::Clock::now() - g_cur.chargedAt).count() > 0.3f;
+}
+
 void Update(RE::Actor* a_actor)
 {
     if (!buffer.can_fire())
         return;
+
+    // the dodge state is over once its clip and a margin have passed, whatever events were missed
+    if (g_cur.active && std::chrono::duration<float>(CurrentDodge::Clock::now() - g_cur.start).count() > g_cur.duration + 1.0f)
+        g_cur.active = false;
+
+    if (Config::Settings::chain_step_to_roll.GetValue() && g_cur.active)
+    {
+        if (TryChain(a_actor))
+            buffer.mark_fired();
+        else
+            buffer.clear();
+        return;
+    }
 
     if (!CanDodge(a_actor))
         return;
@@ -266,7 +394,9 @@ DodgeEventResult GetDodgeEvent(std::string& a_event)
         normalizedInputDirection = g_forcedDirection;
     }
     g_hasForcedDirection = false;
-    if (normalizedInputDirection.x == 0.f && normalizedInputDirection.y == 0.f)
+    g_hasInput = !(normalizedInputDirection.x == 0.f && normalizedInputDirection.y == 0.f);
+    g_input = normalizedInputDirection;
+    if (!g_hasInput)
     {
         return DodgeEventResult::kNoDirection;
     }
@@ -517,7 +647,7 @@ DodgeResult IsWeaponSheathed(const RE::Actor* a_actor)
     return state->IsWeaponDrawn() ? DodgeResult::kSuccess : DodgeResult::kWeaponSheathed;
 }
 
-DodgeResult GetDodgeResult(RE::Actor* a_actor)
+DodgeResult GetDodgeResult(RE::Actor* a_actor, bool a_allowWhileDodging)
 {
     if (!a_actor)
         return DodgeResult::kUnknown;
@@ -543,7 +673,8 @@ DodgeResult GetDodgeResult(RE::Actor* a_actor)
     if (const auto res = IsSwimming(a_actor); res != DodgeResult::kSuccess)
         return res;
 
-    if (const auto res = IsDodging(a_actor); res != DodgeResult::kSuccess)
+    if (const auto res = IsDodging(a_actor); res != DodgeResult::kSuccess &&
+        !(a_allowWhileDodging && res == DodgeResult::kIsDodging))
         return res;
 
     if (const auto res = IsInAttackState(a_actor); res != DodgeResult::kSuccess)
@@ -595,14 +726,10 @@ bool DoDodge(RE::Actor* a_actor)
     {
         iStep = 2;
     }
-    else if (Config::Settings::long_roll.GetValue())
+    if (iStep != 2)
     {
-        int ready = 0;
-        if (a_actor->GetGraphVariableInt("iSDGLongRoll", ready) && ready == 1)
-        {
-            iStep = 4;
-        }
-        else
+        iStep = RollStep(a_actor);
+        if (iStep == 0 && Config::Settings::long_roll.GetValue())
         {
             static bool warned = false;
             if (!warned)
@@ -612,9 +739,12 @@ bool DoDodge(RE::Actor* a_actor)
                              "run Nemesis or Pandora again with Simple Dodge ticked. Using the standard roll.");
             }
         }
+        // item 9: every roll is the forward roll, the body turned to the stick direction first
+        TurnForRoll(a_actor);
+        dodge_event = "TKDodgeForward";
     }
     a_actor->SetGraphVariableInt("iStep", iStep);
-    logger::debug("Dodge: {} (iStep {})", iStep == 2 ? "step" : (iStep == 4 ? "long roll" : "roll"), iStep);
+    logger::debug("Dodge: {} (iStep {}) {}", iStep == 2 ? "step" : (iStep == 4 ? "long roll" : "roll"), iStep, dodge_event);
 
     CastOnDodgeSpell(a_actor);
     float iFrames = Config::Settings::i_frame_duration.GetValue();
@@ -627,7 +757,16 @@ bool DoDodge(RE::Actor* a_actor)
 
     a_actor->SetGraphVariableFloat("TKDR_IframeDuration",
                                    iFrames); // Set invulnerable frame duration
-    return a_actor->NotifyAnimationGraph(dodge_event);
+    const bool sent = a_actor->NotifyAnimationGraph(dodge_event);
+    if (sent && Compat::IsPlayer(a_actor))
+    {
+        g_cur.active   = true;
+        g_cur.step     = iStep == 2;
+        g_cur.chained  = false;
+        g_cur.start    = CurrentDodge::Clock::now();
+        g_cur.duration = iStep == 2 ? StepDuration(dodge_event) : 1.0f;
+    }
+    return sent;
 }
 
 void OnDodgeStart(RE::Actor* a_actor)
@@ -683,6 +822,7 @@ void OnDodgeEnd(RE::Actor* a_actor)
 {
     if (!a_actor)
         return;
+    g_cur.active = false;
     // Dispelled whatever the setting says now, so a switch turned off mid-dodge leaves nothing behind.
     if (auto* spell = Config::Forms::NoStaminaRegenSpell)
     {

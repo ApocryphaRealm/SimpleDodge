@@ -39,7 +39,7 @@ RE::BSEventNotifyControl animEventHandler::HookedProcessEvent(RE::BSAnimationGra
     // The sink sees every actor's graph events: only the player's own dodge charges the player and runs the 1.2.0
     // start actions (before 1.2.0 an NPC's TKDR_DodgeStart charged the player's stamina).
     if (a_event.tag == "TKDR_DodgeStart") {
-        if (player && a_event.holder == player) {
+        if (player && a_event.holder == player && Dodge::ChargeOnDodgeStart()) {
             Dodge::ApplyDodgeCostActor(player);
             Dodge::OnDodgeStart(player);
         } else {

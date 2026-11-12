@@ -192,7 +192,7 @@ DodgeResult HasStamina(RE::Actor* a_actor); // success if actor has enough stami
 DodgeResult IsOverencumbered(const RE::Actor* a_actor); // success if not overencumbered
 DodgeResult IsJumping(const RE::Actor* a_actor);        // kSuccess if actor is not jumping
 DodgeResult IsWeaponSheathed(const RE::Actor* a_actor); // kSuccess if drawn, or sheathed with bDodgeWhenSheathed on
-DodgeResult GetDodgeResult(RE::Actor* a_actor);         // get total dodge result
+DodgeResult GetDodgeResult(RE::Actor* a_actor, bool a_allowWhileDodging = false); // total result; true skips IsDodging (chain)
 bool IsInGodModeHelper(const RE::Actor* a_actor);
 bool CanAttackCancel(const RE::Actor* a_actor);
 bool IsInMCORecovery(const RE::Actor* a_actor);
@@ -202,6 +202,7 @@ DodgeEventResult GetDodgeEvent(std::string& a_event);
 void CastOnDodgeSpell(RE::Actor* a_actor);
 void OnDodgeStart(RE::Actor* a_actor); // the player's TKDR_DodgeStart: no-regen spell, dodge sound
 void OnDodgeEnd(RE::Actor* a_actor);   // the player's TKDR_DodgeEnd: dispel the no-regen spell
+bool ChargeOnDodgeStart();             // false right after a chained roll charged itself (no double charge)
 
 
 } // namespace Dodge
