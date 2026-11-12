@@ -37,67 +37,48 @@ namespace Hooks
 	// holding the sprint button"): the press is now counted once from its FIRST down (a down that arrives while it is
 	// still held - re-sent by a sprint mod, or rewritten - is not a new press), the tap is measured on our own clock as
 	// well as the game's held time, and a press that was a hold tells the double-tap detector so (TapDetector.h).
-	struct TapKey
-	{
-		Tap::Press press;
-		bool       beganInMenu = false;
-		bool       stopping = false;  // this press ends a sprint / sneak rather than starting a dodge
-	};
-	static TapKey g_sprintKey;
-	static TapKey g_sneakKey;
+	static Tap::TapKeyState g_sprintKey;
+	static Tap::TapKeyState g_sneakKey;
 
-	// Shared by both handlers. Returns true when the event was a dodge tap and must not reach the game.
-	static bool HandleTapKey(TapKey& a_key, RE::ButtonEvent* a_event, bool a_active, float a_window, const char* a_what)
+	// Shared by both handlers; the decision itself is Tap::TapKeyState (tests\test_tap_detector.cpp drives it).
+	// Returns true when the event must not reach the game.
+	static bool HandleTapKey(Tap::TapKeyState& a_key, RE::ButtonEvent* a_event, bool a_active, float a_window, const char* a_what)
 	{
 		const auto now = Tap::Clock::now();
-		const bool up = a_event->IsUp();
-		if (a_event->IsDown() && a_key.press.Down(now)) {
-			a_key.beganInMenu = Utility::IsInMenu();
-		}
-		if (a_event->IsDown() && a_active) {
-			a_key.stopping = true;
-		} else if (a_event->HeldDuration() < a_window) {
-			if (!up) {
-				return true;  // still inside the tap window: hold it back from the game until we know
-			}
-			const auto down = a_key.press.downAt;
-			const float own = a_key.press.Up(now);
-			const bool tap = Tap::IsTap(own, a_event->HeldDuration(), a_window);
-			const bool blocked = Utility::IsInMenu() || a_key.beganInMenu || own < 0.0F ||
-			                     Compat::WithinMenuExitGrace(Config::Settings::menu_exit_grace.GetValue());
-			// ... and not in the moment just after a menu closed. The press that LEAVES a menu is handed to gameplay
-			// with the menu already shut, so IsInMenu is false by then and the tap read as a dodge (the owner,
-			// 2026-09-16: "the guard against dodging out of the quest journal menu did not work").
-			if (tap && !blocked) {
-				logger::debug("{} key tapped ({:.2f}s) - dodge input", a_what, own);
-				if (Config::Settings::use_double_tap.GetValue()) {
-					Dodge::OnTap(down, now);
-				} else {
-					Dodge::OnInput();
-				}
-			} else if (own < 0.0F || a_key.beganInMenu) {
-				logger::debug("{} key tap ignored: {}", a_what,
-					own >= 0.0F ? "the press began while a menu was open" : "no matching press - it was made while a menu held input");
-			} else if (!tap) {
-				logger::debug("{} key released after {:.2f}s (game reports {:.2f}s) - a hold, not a tap", a_what, own,
-					a_event->HeldDuration());
-				Dodge::OnHold();
-			}
-			a_key.beganInMenu = false;
-			a_key.stopping = false;
-			if (tap) {
-				return true;  // a short tap is the dodge, not a sprint / sneak
-			}
-		} else if (!a_active && !a_key.stopping) {
-			a_event->heldDownSecs = 0.0F;  // the delayed press reaches the game now, as a fresh press
-		} else if (up) {
-			a_key.stopping = false;
-		}
-		if (up && a_key.press.held) {
-			a_key.press.Up(now);
+		const bool inMenu = Utility::IsInMenu();
+		// ... and not in the moment just after a menu closed. The press that LEAVES a menu is handed to gameplay with
+		// the menu already shut, so IsInMenu is false by then and the tap read as a dodge (the owner, 2026-09-16: "the
+		// guard against dodging out of the quest journal menu did not work").
+		const bool grace = Compat::WithinMenuExitGrace(Config::Settings::menu_exit_grace.GetValue());
+		const float reported = a_event->HeldDuration();
+		const bool beganInMenu = a_key.beganInMenu;
+		const auto d = a_key.OnEvent(now, a_event->IsDown(), a_event->IsUp(), reported, a_active, inMenu, grace, a_window,
+			Config::Settings::use_double_tap.GetValue());
+		switch (d.action) {
+		case Tap::Action::kDodge:
+			logger::debug("{} key tapped ({:.2f}s) - dodge input", a_what, Tap::SecondsBetween(d.tapDown, now));
+			Dodge::OnInput();
+			break;
+		case Tap::Action::kTap:
+			logger::debug("{} key tapped ({:.2f}s) - double-tap input", a_what, Tap::SecondsBetween(d.tapDown, now));
+			Dodge::OnTap(d.tapDown, now);
+			break;
+		case Tap::Action::kHold:
+			logger::debug("{} key released (game reports {:.2f}s) - a hold, not a tap", a_what, reported);
 			Dodge::OnHold();
+			break;
+		default:
+			if (a_event->IsUp() && d.swallow) {
+				logger::debug("{} key tap ignored: {}", a_what,
+					beganInMenu ? "the press began while a menu was open" : "a menu was open or had just closed, or no matching press");
+			}
+			break;
 		}
-		return false;
+		if (d.zeroHeld) {
+			a_event->heldDownSecs = 0.0F;  // the delayed press reaches the game now, as a fresh press - once per press
+			logger::trace("{} key held past the tap window - handed to the game", a_what);
+		}
+		return d.swallow;
 	}
 
 	void SprintHandlerHook::ProcessButton(RE::SprintHandler* a_this, RE::ButtonEvent* a_event, RE::PlayerControlsData* a_data)

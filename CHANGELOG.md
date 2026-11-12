@@ -3,6 +3,7 @@
 ## 1.1.0 - 2026-11-12 - untested
 
 ### Fixed
+- A held sprint (or sneak) press is judged once, when it goes down: a press that outlasts the tap length reaches the game as a fresh press exactly once, so another mod that sets the sprint flag can no longer block the delayed sprint.
 - Nemesis no longer stops with a critical error (Missing info in info.ini, Mod: sdge) when Simple Dodge is installed: the behaviour patch's info.ini now names its Nexus page (site=), which Nemesis requires. Pandora was never affected.
 - Forty-two settings-page labels and help texts were English in every language; all eleven languages now carry them.
 - A dodge key that is also the sprint or sneak key no longer counts one tap twice.

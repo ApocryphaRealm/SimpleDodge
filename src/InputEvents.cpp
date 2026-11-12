@@ -70,8 +70,7 @@ namespace Events
 		// The dodge key, counted once from its first down to its release (1.1.0). This sink runs AFTER the player
 		// controls on the same events, so it also sees what their hooks rewrote - the sprint hook hands the game a held
 		// press with heldDownSecs 0, which 1.0.0 read here as a new press every frame (TapDetector.h).
-		Tap::Press g_dodgeKey;
-		bool       g_dodgeKeyBlocked = false;  // this press began in a menu or just after one closed
+		Tap::DodgeKeyState g_dodgeKey;  // the decision itself; tests\test_tap_detector.cpp drives it
 
 		bool BlockedNow(std::uint32_t a_id)
 		{
@@ -105,35 +104,27 @@ namespace Events
 		void HandleDodgeKey(const RE::ButtonEvent* a_button, std::uint32_t a_id)
 		{
 			const auto now = Tap::Clock::now();
-			if (a_button->IsPressed()) {
-				if (g_dodgeKey.held) {
-					return;  // still the same press: a repeat, or an event another handler rewrote
-				}
-				g_dodgeKey.Down(now);
-				// First seen already held (it went down in a menu) or blocked now: this whole press is not a dodge.
-				g_dodgeKeyBlocked = !a_button->IsDown() || BlockedNow(a_id);
-				if (g_dodgeKeyBlocked) {
-					return;
-				}
+			const bool pressed = a_button->IsPressed();
+			// Only a NEW press is checked against the menus; a press first seen already held went down in a menu.
+			const bool newPress = pressed && !g_dodgeKey.press.held;
+			const bool blockedNow = newPress && BlockedNow(a_id);
+			const auto action = g_dodgeKey.OnEvent(now, pressed, a_button->IsDown(), a_button->IsUp(), a_button->HeldDuration(),
+				blockedNow, Config::Settings::use_double_tap.GetValue());
+			switch (action) {
+			case Tap::Action::kDodge:
 				logger::debug("Dodge key {} pressed", a_id);
-				if (!Config::Settings::use_double_tap.GetValue()) {
-					Dodge::OnInput();
-				}
-				return;
-			}
-			if (!a_button->IsUp()) {
-				return;
-			}
-			const auto down = g_dodgeKey.downAt;
-			const float held = g_dodgeKey.Up(now);
-			if (held < 0.0F || g_dodgeKeyBlocked || !Config::Settings::use_double_tap.GetValue()) {
-				return;
-			}
-			if (Tap::IsTap(held, a_button->HeldDuration())) {
-				Dodge::OnTap(down, now);
-			} else {
-				logger::trace("Dodge key {} held {:.2f}s - not a tap", a_id, held);
+				Dodge::OnInput();
+				break;
+			case Tap::Action::kTap:
+				logger::debug("Dodge key {} tapped", a_id);
+				Dodge::OnTap(g_dodgeKey.tapDown, now);
+				break;
+			case Tap::Action::kHold:
+				logger::trace("Dodge key {} held - not a tap", a_id);
 				Dodge::OnHold();
+				break;
+			default:
+				break;
 			}
 		}
 

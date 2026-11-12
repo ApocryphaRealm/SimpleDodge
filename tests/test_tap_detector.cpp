@@ -140,6 +140,75 @@ int main()
 		Check(d.Down(At(0.2)), "a repeat down during the first tap does not break the double tap");
 	}
 
+	// ---- the sprint hook's per-press decision (TapKeyState), the Sprint or Sneak helper's review, 2026-11-12 ----
+	// Frames of a 1.5 s sprint hold at 60 fps; a_active = the live sprint flag the hook reads each frame.
+	auto runSprint = [](TapKeyState& k, bool activeAtDown, bool flipActiveMidPress, int* zeroed, int* dodges, int* swallowed) {
+		*zeroed = *dodges = *swallowed = 0;
+		auto count = [&](const TapKeyDecision& d) {
+			*zeroed += d.zeroHeld; *swallowed += d.swallow;
+			*dodges += (d.action == Action::kDodge || d.action == Action::kTap);
+		};
+		count(k.OnEvent(At(0.0), true, false, 0.0F, activeAtDown, false, false, 0.3F, false));
+		for (double t = 1.0 / 60.0; t < 1.5; t += 1.0 / 60.0) {
+			const bool active = flipActiveMidPress ? (t > 0.2) : activeAtDown;  // an outer mod writes the flag
+			count(k.OnEvent(At(t), false, false, static_cast<float>(t), active, false, false, 0.3F, false));
+		}
+		count(k.OnEvent(At(1.5), false, true, 1.5F, false, false, false, 0.3F, false));
+	};
+	{
+		TapKeyState k; int z, d, s;
+		runSprint(k, false, false, &z, &d, &s);
+		Check(z == 1 && d == 0, "sprint hold: the game gets the delayed fresh press exactly once, no dodge");
+	}
+	{
+		TapKeyState k; int z, d, s;
+		runSprint(k, false, true, &z, &d, &s);
+		Check(z == 1 && d == 0, "sprint hold while another mod sets the sprint flag mid-press: fresh press still handed over once");
+	}
+	{
+		TapKeyState k; int z, d, s;
+		runSprint(k, true, false, &z, &d, &s);
+		Check(z == 0 && d == 0, "a press that ends a sprint is the game's: never rewritten, a hold is no dodge");
+	}
+	{
+		TapKeyState k;
+		auto a = k.OnEvent(At(0.0), true, false, 0.0F, false, false, false, 0.3F, false);
+		auto b = k.OnEvent(At(0.05), false, false, 0.05F, false, false, false, 0.3F, false);
+		auto c = k.OnEvent(At(0.12), false, true, 0.12F, false, false, false, 0.3F, false);
+		Check(a.swallow && b.swallow && c.swallow && c.action == Action::kDodge && !a.zeroHeld && !b.zeroHeld,
+			"a quick sprint tap is held back from the game and dodges on release");
+	}
+	{
+		TapKeyState k;
+		k.OnEvent(At(0.0), true, false, 0.0F, false, false, false, 0.3F, false);
+		auto c = k.OnEvent(At(0.12), false, true, 0.12F, false, false, true, 0.3F, false);
+		Check(c.swallow && c.action == Action::kNone, "a sprint tap just after a menu closed is swallowed, no dodge");
+	}
+
+	// ---- the dodge-key sink (DodgeKeyState): uDodgeKey = 42 (Left Shift), NOT the sprint key ----
+	{
+		DodgeKeyState k; int dodges = 0;
+		auto c = [&](Action a) { dodges += (a == Action::kDodge); };
+		c(k.OnEvent(At(0.0), true, true, false, 0.0F, false, false));          // press
+		for (double t = 0.05; t < 0.9; t += 0.05) c(k.OnEvent(At(t), true, true, false, 0.0F, false, false));  // repeats
+		c(k.OnEvent(At(0.9), false, false, true, 0.9F, false, false));
+		Check(dodges == 1, "double tap off: one Left Shift press (with key repeats) dodges exactly once - it is the dodge key");
+	}
+	{
+		DodgeKeyState k; int dodges = 0;
+		auto c = [&](Action a) { dodges += (a == Action::kDodge || a == Action::kTap); };
+		c(k.OnEvent(At(0.0), true, true, false, 0.0F, false, true));
+		c(k.OnEvent(At(0.5), true, false, false, 0.5F, false, true));
+		const Action up = k.OnEvent(At(1.0), false, false, true, 1.0F, false, true);
+		c(up);
+		Check(dodges == 0 && up == Action::kHold, "double tap on: holding Left Shift never dodges and reports a hold");
+	}
+	{
+		DodgeKeyState k;
+		const Action a = k.OnEvent(At(0.0), true, false, false, 0.4F, false, false);  // first seen already held
+		Check(a == Action::kNone, "a dodge-key press first seen already held (made in a menu) does not dodge");
+	}
+
 	std::printf(g_fail ? "%d of %d FAILED\n" : "all %d passed\n", g_fail ? g_fail : g_n, g_n);
 	return g_fail ? 1 : 0;
 }
