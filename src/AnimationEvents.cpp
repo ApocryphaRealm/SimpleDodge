@@ -36,12 +36,15 @@ RE::BSEventNotifyControl animEventHandler::HookedProcessEvent(RE::BSAnimationGra
 
     const auto player = RE::PlayerCharacter::GetSingleton();
 
+    // The sink sees every actor's graph events: only the player's own dodge charges the player and runs the 1.2.0
+    // start actions (before 1.2.0 an NPC's TKDR_DodgeStart charged the player's stamina).
     if (a_event.tag == "TKDR_DodgeStart") {
-        if (player)
+        if (player && a_event.holder == player) {
             Dodge::ApplyDodgeCostActor(player);
-        // 1.2.0 additions act on the player's own dodge only (the sink also sees other actors' graph events)
-        if (player && a_event.holder == player)
             Dodge::OnDodgeStart(player);
+        } else {
+            logger::trace("TKDR_DodgeStart from another actor - not charged to the player");
+        }
     }
     if (a_event.tag == "TKDR_DodgeEnd") {
         if (player && a_event.holder == player)
