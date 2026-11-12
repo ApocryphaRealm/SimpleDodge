@@ -13,6 +13,9 @@
 - A DodgeCostModifier or ExtraDodgeCostModifier actor value that reads 0 or less (defined by another mod's Actor Value Generator file, such as TK Dodge RE Addon's) no longer makes dodges free; it counts as 1, and the log says so once.
 - Without Perk Entry Point Extender (it is optional), the log no longer prints a critical 'PerkEntryPointExtender.dll not found' line several times on every dodge press; it says once, at info level, that perks cannot change the dodge cost or invincibility time without it.
 
+### Changed
+- Step dodges reworked, all eight directions and the open-hand unarmed set: the body stays lower through the step, the trunk leans into the direction of the dodge and is upright again after landing, and the leg you land on arrives bent with its knee turned in toward the body, then sinks deeper to absorb the landing before rising back. Clip lengths, events and travel are unchanged.
+
 ## 1.1.0 - 2026-11-12 - untested
 
 ### Fixed

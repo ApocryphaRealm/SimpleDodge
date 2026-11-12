@@ -228,6 +228,7 @@ class Mirror(Design):
     def v(self, name, f):
         S = self.src
         if name in self.NEG: return -S.v(name, f)
+        if name.startswith(("lf_", "rf_")): return S.v(("rf_" if name.startswith("lf_") else "lf_") + name[3:], f)
         if name.startswith(("lh_", "rh_")):
             o = ("rh_" if name.startswith("lh_") else "lh_") + name[3:]
             return -S.v(o, f) if name.endswith("dx") else S.v(o, f)
@@ -385,12 +386,19 @@ def _feet(g, axis, lead, push):
 RIGHT = Design("Right", dict(
     com_off_x=[(0, 0), (2, -14), (3, -24), (5, -14), (9, 0), (12, 12), (14, 15), (15, 16), (17, 16), (19, 8), (21, 0)],
     com_off_y=[(0, 0.5), (21, 0.5)],
-    com_z=[(0, 64.5), (2, 58), (3, 55), (4, 58), (7, 64), (10, 66), (13, 63), (15, 58), (17, 55), (19, 59), (21, 64.5)],
-    hip_roll=[(0, 0), (2, 3), (4, 6), (8, 4), (12, 1), (15, -3), (18, -1), (21, 0)],      # + leans right
+    # 2026-11-12 rework (the owner: "make the torso move in the direction of the dodge and make the step dodges lower
+    # to the ground with more knee bending on arrival"): the whole step ~5 units lower, the landing compression deeper
+    # (pelvis dips to ~51 on the lead foot's landing) before rising back to the stance; the trunk leans into the travel
+    # through the push and flight and is upright again after the landing.
+    com_z=[(0, 64.5), (2, 57), (3, 54), (4, 56), (7, 59.5), (10, 61), (13, 58), (15, 53.5), (17, 51), (19, 56.5), (21, 64.5)],
+    hip_roll=[(0, 0), (2, 4), (4, 9), (8, 10), (12, 7), (15, 3), (17, -1), (19, -0.5), (21, 0)],      # + leans right
     hip_pitch=[(0, -2), (3, -6), (7, -4), (12, -3), (16, -6), (19, -4), (21, -2)],
     hip_yaw=[(0, 0), (3, 3), (9, -2), (15, 2), (21, 0)],
-    spine_roll=[(0, 0), (3, 2), (8, 3), (13, 0), (16, -2), (21, 0)],
+    spine_roll=[(0, 0), (3, 4), (6, 8), (10, 8), (13, 4), (16, 0), (18, -1), (21, 0)],
     spine_pitch=[(0, -3), (3, -7), (15, -6), (21, -3)],
+    # knee_in 0..1 (the owner, 2026-11-12: "the knee you land on should point toward the body on landing"): turns that
+    # leg's knee from slightly out (0) to in toward the centre line (1) through its landing and absorb
+    rf_knee_in=[(0, 0), (12, 0), (14, 1), (19, 1), (21, 0)], lf_knee_in=[(0, 0), (17, 0), (19, 0.8), (21, 0)],
     lh_dx=[(0, 0), (4, -3), (10, 2), (16, 4), (21, 0)], lh_dz=[(0, 0), (5, 2), (13, -2), (21, 0)],
     rh_dx=[(0, 0), (4, -3), (10, 2), (16, 4), (21, 0)], rh_dz=[(0, 0), (5, 2), (13, -2), (21, 0)],
     **_feet(None, "x",
@@ -405,12 +413,13 @@ _FY = 409.283
 FORWARD = Design("Forward", dict(
     com_off_x=[(0, 0), (26, 0)],
     com_off_y=[(0, 0.5), (2, -8), (4, -16), (7, -6), (11, 5), (15, 14), (17, 22), (20, 24), (23, 10), (26, 0.5)],
-    com_z=[(0, 64.5), (2, 60), (4, 56), (6, 60), (9, 65), (12, 68), (15, 66), (18, 61), (20, 57), (22, 55.5),
-           (24, 59), (26, 64.5)],
-    hip_pitch=[(0, -2), (3, -6), (6, -9), (11, -10), (17, -8), (20, -7), (23, -4), (26, -2)],
+    com_z=[(0, 64.5), (2, 59), (4, 55), (6, 58), (9, 61.5), (12, 63), (15, 61), (18, 56.5), (20, 52.5), (22, 50.5),
+           (24, 56), (26, 64.5)],
+    hip_pitch=[(0, -2), (3, -8), (6, -13), (11, -15), (17, -13), (20, -10), (23, -5), (26, -2)],
     hip_roll=[(0, 0), (4, -2), (10, 1), (17, 2), (21, -1), (26, 0)],
     hip_yaw=[(0, 0), (3, -3), (6, -6), (12, 2), (17, 5), (22, -2), (26, 0)],
-    spine_pitch=[(0, -3), (4, -7), (17, -8), (23, -5), (26, -3)],
+    spine_pitch=[(0, -3), (4, -9), (11, -12), (17, -11), (21, -7), (24, -4), (26, -3)],
+    lf_knee_in=[(0, 0), (17, 0), (19, 1), (24, 1), (26, 0)], rf_knee_in=[(0, 0), (21, 0), (23, 0.8), (25, 0.6), (26, 0)],
     lh_dy=[(0, 0), (6, 4), (14, -2), (20, 2), (26, 0)], rh_dy=[(0, 0), (6, -4), (14, 2), (20, -2), (26, 0)],
     **_feet(None, "y",
         ("lf", [(0, 2, -12, 16, 10), (20, 26, -12, _FY + 16, 0)], [14],
@@ -422,12 +431,14 @@ FORWARD = Design("Forward", dict(
 BACK = Design("Back", dict(
     com_off_x=[(0, 0), (24, 0)],
     com_off_y=[(0, 0.5), (2, 10), (3, 20), (5, 10), (8, 0), (10, -8), (14, -18), (17, -24), (19, -14), (22, -4), (24, 0.5)],
-    com_z=[(0, 64.5), (2, 59), (3, 56), (5, 60), (8, 64), (11, 64.5), (14, 61), (16, 57), (18, 55.5), (21, 59),
-           (24, 64.5)],
-    hip_pitch=[(0, -2), (3, -6), (8, -3), (14, -4), (17, -7), (21, -4), (24, -2)],
+    com_z=[(0, 64.5), (2, 58), (3, 55), (5, 57.5), (8, 60.5), (11, 61), (14, 58), (16, 54), (18, 51), (20, 52.5),
+           (22, 57), (24, 64.5)],
+    # + pitch leans back, into this clip's travel; forward again to absorb the landing, then the stance
+    hip_pitch=[(0, -2), (3, -5), (6, 2), (10, 6), (14, 4), (17, 0), (20, -3), (22, -3), (24, -2)],
     hip_roll=[(0, 0), (5, 2), (12, -1), (18, 1), (24, 0)],
     hip_yaw=[(0, 0), (3, 3), (9, -3), (16, 2), (24, 0)],
-    spine_pitch=[(0, -3), (3, -6), (8, -2), (17, -7), (24, -3)],
+    spine_pitch=[(0, -3), (3, -5), (7, 2), (11, 5), (15, 2), (18, -3), (21, -4), (24, -3)],
+    rf_knee_in=[(0, 0), (14, 0), (16, 1), (21, 1), (24, 0)], lf_knee_in=[(0, 0), (19, 0), (21, 0.8), (23, 0.6), (24, 0)],
     lh_dy=[(0, 0), (4, 4), (10, 2), (16, -1), (24, 0)], rh_dy=[(0, 0), (4, 4), (10, 2), (16, -1), (24, 0)],
     **_feet(None, "y",
         ("rf", [(0, 1, 12, -16, 6), (17, 24, 12, -316.0, 0)], [12],
@@ -567,11 +578,17 @@ class Diagonal(Design):
         if name == "spine_pitch": return S.v("spine_pitch", f) - slean * self.u.y
         if name == "hip_yaw":     return S.v("hip_yaw", f) * self.sgn * (1 if self.u.y >= 0 else -1) * 0.5
         return S.v(name, f)
+    # 2026-11-12: laid onto the diagonal, the lead foot lands further from the hips than in the side clip (the stance's
+    # own fore-aft offset adds to the travel), so the lead leg reached full stretch and landed straight. The body is
+    # carried a little further along the axis and lower through the landing, so that leg arrives bent.
+    LAND_LEAD = [(0, 0), (10, 0), (13, 8), (15, 10), (18, 4), (21, 0)]
+    LAND_DZ = [(0, 0), (11, 0), (14, -3), (16, -2), (19, 0), (21, 0)]
     def com_local(self, f):
         S = self.src
         w = (S.com_local(f) + S.root(f)).x * self.sgn * self.k   # body travel along the dodge axis
+        w += mono(self.LAND_LEAD, f)
         world = Vector((0.0, 0.5, 0.0)) + self.u * w
-        loc = world - self.root(f); loc.z = S.com_local(f).z
+        loc = world - self.root(f); loc.z = S.com_local(f).z + mono(self.LAND_DZ, f)
         return loc
     def foot(self, pre, f):
         x, y, lift, heel = self.src.foot(pre, f)
@@ -616,12 +633,14 @@ def _switch_keys(name):
     sw = {"lf": (-12.0, -16.0), "rf": (12.0, 16.0)}                 # switched stance
     K = dict(
         body_yaw=[(0, 0), (3, 25), (6, 50), (18, 50), (23, 25), (e, 0)],     # whole body turns to the switched side
-        com_z=[(0, 64.5), (2, 61), (5, 57), (8, 62), (13, 65), (18, 62), (21, 56), (24, 60), (e, 64.5)],
+        com_z=[(0, 64.5), (2, 60), (5, 55.5), (8, 59), (13, 61), (18, 58), (21, 52.5), (23, 50.5), (25, 56), (e, 64.5)],
         lag=[(0, 0), (4, -4), (8, 0), (16, 8), (21, 6), (e, 0)],
-        hip_roll=[(0, 0), (6, 4 * ux / abs(ux)), (14, 3 * ux / abs(ux)), (21, -2 * ux / abs(ux)), (e, 0)],
-        hip_pitch=[(0, -2), (6, -6 if fwd else -4), (14, -5 if fwd else -3), (21, -6), (e, -2)],
-        spine_pitch=[(0, -3), (6, -7), (16, -6), (e, -3)],
+        hip_roll=[(0, 0), (6, 7 * ux / abs(ux)), (14, 8 * ux / abs(ux)), (21, -1 * ux / abs(ux)), (e, 0)],
+        hip_pitch=[(0, -2), (6, -10 if fwd else 6), (14, -9 if fwd else 7), (21, -6 if fwd else -3), (e, -2)],
+        spine_pitch=[(0, -3), (6, -9 if fwd else 3), (16, -8 if fwd else 4), (e, -3)],
     )
+    K[("rf" if fwd else "lf") + "_knee_in"] = [(0, 0), (19, 0), (21, 1), (24, 1), (e, 0)]      # lead foot lands at 21
+    K[("lf" if fwd else "rf") + "_knee_in"] = [(0, 0), (23, 0), (25, 0.8), (e, 0.3)]           # push foot at 25
     K.update(gait(lead, [(0, 3, st[lead][0], st[lead][1], 10), (21, e, st[lead][0] + Ex, st[lead][1] + Ey, 0)], [14]))
     if not fwd:
         # Back-Left, amended (the owner, 2026-11-11): "just bring the left foot back behind the character. And jump
@@ -830,7 +849,14 @@ def _solve_pose(D, f, dz=0.0):
                 s = G[i].translation
                 h0, k0, a0 = P0(BN[th]), P0(BN[ca]), P0(BN[fo])
                 l1, l2 = (k0 - h0).length, (a0 - k0).length
-                pole = yaws[side] @ Vector((0.25 if side == "R" else -0.25, 1, 0))
+                # knee_in (2026-11-12): 0 = knee a touch outward (as before), 1 = in toward the centre line
+                # The landing knee aims in from the HIPS' forward, not the foot's: a turned-out rear foot (FOOT_YAW)
+                # would otherwise carry the knee out with it.
+                kin = 0.0 if D.roll else max(0.0, min(1.0, D.v(("rf" if side == "R" else "lf") + "_knee_in", f)))
+                sgn = 1.0 if side == "R" else -1.0
+                pole_out = (yaws[side] @ Vector((sgn * 0.25, 1, 0))).normalized()
+                pole_in = (Rax('Z', D.v("hip_yaw", f) + y0) @ Vector((-sgn * 0.55, 1, 0))).normalized()
+                pole = pole_out.lerp(pole_in, kin)
                 if D.roll:            # knees aim straight at the chest as the body turns - not bent outwards (owner, 2026-11-11)
                     wv = D.v("tuck", f)
                     pole = Rhip @ Vector(((0.25 if side == "R" else -0.25) * (1 - wv), 1, 0))

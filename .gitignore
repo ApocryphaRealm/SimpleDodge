@@ -22,3 +22,6 @@ anim-src/__pycache__/
 anim-src/_hero/
 anim-src/_showcase_follow/
 anim-src/gif-showcase/
+
+# rework working files (before/after renders, downloads)
+_work/
