@@ -88,7 +88,7 @@ namespace Config
 			a_fn(S::sneaking_press_duration); a_fn(S::use_double_tap); a_fn(S::disable_in_third);
 			a_fn(S::dodge_cost); a_fn(S::dodge_key); a_fn(S::use_sprint_key); a_fn(S::use_mco_recover_window);
 			a_fn(S::use_perk_lock); a_fn(S::use_percentage_cost); a_fn(S::remove_forward); a_fn(S::eight_way);
-			a_fn(S::directional_double_tap); a_fn(S::long_roll);
+			a_fn(S::directional_double_tap); a_fn(S::long_roll); a_fn(S::dodge_when_sheathed);
 			a_fn(S::dodge_perk_ID); a_fn(S::on_dodge_spell_ID); a_fn(S::on_dodge_spell_perk_ID);
 			a_fn(S::log_level);
 		}

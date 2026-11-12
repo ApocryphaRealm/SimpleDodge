@@ -10,7 +10,8 @@ spell, its own step dodges, diagonals, rolls and an unarmed set, and a settings 
 - SKSE and Address Library for SKSE Plugins
 - Pandora Behaviour Engine or Nemesis, run after installing
 - Optional: SKSE Menu Framework (settings page), Open Animation Replacer (unarmed set), IFrame Generator RE,
-  Behavior Data Injector (MCO/BFCO recovery-window option)
+  Behavior Data Injector (MCO/BFCO recovery-window option), Perk Entry Point Extender, so perks can change the dodge
+  cost and invincibility time
 
 ## Building
 

@@ -17,6 +17,30 @@ static Tap::DoubleTap dodgeDoubleTap;
 static bool g_hasForcedDirection = false;
 static RE::NiPoint2 g_forcedDirection{};
 
+// Perk Entry Point Extender is OPTIONAL. Its API header looks the DLL up on every call and logs a critical line each
+// time it is missing - several per dodge press, which a player read as the reason the dodge failed (Discord report,
+// 2026-11-12). Resolve it once, keep the answer either way, and say once at info level what its absence means.
+static bool PerkEntryPointsAvailable()
+{
+    static const bool available = [] {
+        if (!GetModuleHandleW(L"PerkEntryPointExtender.dll"))
+        {
+            logger::info("Perk Entry Point Extender is not installed (it is optional): without it, perks cannot change "
+                         "the dodge cost or the invincibility time.");
+            return false;
+        }
+        if (!PerkEntryPointExtenderAPI::RequestInterface())
+        {
+            logger::info("Perk Entry Point Extender is loaded but gave no interface (it is optional): perks cannot "
+                         "change the dodge cost or the invincibility time.");
+            return false;
+        }
+        logger::info("Perk Entry Point Extender found: perks can change the dodge cost and the invincibility time.");
+        return true;
+    }();
+    return available;
+}
+
 static bool InputBlocked()
 {
     return Utility::IsInMenu() || g_menuBlocker.active();
@@ -86,6 +110,10 @@ bool CanDodge(RE::Actor* a_actor)
         return true;
     }
     logger::debug("Dodge failed because of: {}", DodgeResultToString(result));
+    // Sheathed does not change within the buffer's window (drawing counts as sheathed until it ends): drop the press
+    // instead of re-checking - and re-logging - it every frame.
+    if (result == DodgeResult::kWeaponSheathed)
+        buffer.clear();
 
     return false;
 }
@@ -183,7 +211,8 @@ float CalculateDodgeCost(RE::Actor* a_actor)
     }
     RE::TESForm* armo = a_actor->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kBody, true);
 
-    RE::HandleEntryPoint(RE::PerkEntryPoint::kModPowerAttackStamina, a_actor, cost, MOD::DODGE_COST_PERK, armo);
+    if (PerkEntryPointsAvailable())
+        RE::HandleEntryPoint(RE::PerkEntryPoint::kModPowerAttackStamina, a_actor, cost, MOD::DODGE_COST_PERK, armo);
     logger::debug("Dodge Cost after is {}", cost);
 
     return cost;
@@ -459,6 +488,19 @@ DodgeResult IsJumping(const RE::Actor* a_actor)
     return DodgeResult::kIsJumping;
 }
 
+DodgeResult IsWeaponSheathed(const RE::Actor* a_actor)
+{
+    // Sheathed, the character is in 0_master's MT_Behavior_State (mt_behavior); the dodge is there only since the
+    // 1.2.0 behaviour patch. Off (the default) refuses it here, before stamina or the event - in 1.1.0 the event went
+    // to a graph state with no dodge, and the input buffer re-sent it every frame for its whole window.
+    if (Config::Settings::dodge_when_sheathed.GetValue())
+        return DodgeResult::kSuccess;
+    const auto state = a_actor->AsActorState();
+    if (!state)
+        return DodgeResult::kUnknown;
+    return state->IsWeaponDrawn() ? DodgeResult::kSuccess : DodgeResult::kWeaponSheathed;
+}
+
 DodgeResult GetDodgeResult(RE::Actor* a_actor)
 {
     if (!a_actor)
@@ -474,6 +516,9 @@ DodgeResult GetDodgeResult(RE::Actor* a_actor)
         return res;
 
     if (const auto res = IsInWrongState(a_actor); res != DodgeResult::kSuccess)
+        return res;
+
+    if (const auto res = IsWeaponSheathed(a_actor); res != DodgeResult::kSuccess)
         return res;
 
     if (const auto res = IsJumping(a_actor); res != DodgeResult::kSuccess)
@@ -559,7 +604,8 @@ bool DoDodge(RE::Actor* a_actor)
     float iFrames = Config::Settings::i_frame_duration.GetValue();
 
     RE::TESForm* armo = a_actor->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kBody, true);
-    RE::HandleEntryPoint(RE::PerkEntryPoint::kModPowerAttackStamina, a_actor, iFrames, MOD::IFRAME_DURATION_PERK, armo);
+    if (PerkEntryPointsAvailable())
+        RE::HandleEntryPoint(RE::PerkEntryPoint::kModPowerAttackStamina, a_actor, iFrames, MOD::IFRAME_DURATION_PERK, armo);
 
     iFrames = std::clamp(iFrames, 0.0f, 3.0f);
 

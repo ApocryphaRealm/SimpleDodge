@@ -1,5 +1,13 @@
 # Changelog - Simple Dodge
 
+## 1.2.0 - 2026-11-12 - untested
+
+### Added
+- Dodge with weapons sheathed (off by default; on the settings page, or bDodgeWhenSheathed in the INI). The behaviour patch now puts every dodge - step dodges, rolls, long rolls and diagonals - into the weapons-away animations too, in third and first person, and the open-hand unarmed set plays while weapons are sheathed. With it off, a dodge with weapons sheathed is refused at once, before any stamina is spent. Needs Nemesis or Pandora run again.
+
+### Fixed
+- Without Perk Entry Point Extender (it is optional), the log no longer prints a critical 'PerkEntryPointExtender.dll not found' line several times on every dodge press; it says once, at info level, that perks cannot change the dodge cost or invincibility time without it.
+
 ## 1.1.0 - 2026-11-12 - untested
 
 ### Fixed

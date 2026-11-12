@@ -63,6 +63,10 @@ namespace Config
 		// player: "for the roll dodge it makes more sense to cover more ground"). Off = the roll goes as far as the
 		// step, as in 1.0.0. Needs the 1.1.0 patch generated (the graph variable iSDGLongRoll); without it, the old roll.
 		inline static Value<bool>        long_roll{ "Settings", "bLongRoll", true };
+		// Dodge with the weapon sheathed (1.2.0, the owner, 2026-11-12). The 1.2.0 behaviour patch adds the dodge to the
+		// weapons-away graph (mt_behavior); off keeps the 1.1.0 behaviour - a sheathed dodge is refused here, before
+		// stamina or the event, instead of being sent to a graph state with no dodge in it.
+		inline static Value<bool>        dodge_when_sheathed{ "Settings", "bDodgeWhenSheathed", false };
 		// How long after a menu CLOSES a dodge key press is ignored, in seconds.
 		//
 		// The menu-open check is not enough on its own: the press that closes a menu is delivered to gameplay in the

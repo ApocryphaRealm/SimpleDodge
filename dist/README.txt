@@ -2,7 +2,7 @@ Simple Dodge
 Version 1.0.0
 
 WHAT IT IS
-An SKSE dodge for Skyrim SE 1.5.97, AE 1.6.1170 and Skyrim 1.7.x. Tap Sprint (or a dodge key, or Sneak) with a direction held and your character steps out of the way: a weighted step with the guard up, or a roll if you prefer. Eight directions, dodge in place, double tap if you want it (of the dodge key, or of a direction), a long roll, a stamina cost (flat or a share of max stamina), invincibility frames, attack cancel (light attacks only if you like, or only in the MCO/BFCO recovery window), dodge while sneaking, an optional perk lock and an on-dodge spell. Its own step dodges, diagonals, rolls and an open-hand unarmed set are included. Settings are on a menu page and in Simple Dodge.ini, in eleven languages.
+An SKSE dodge for Skyrim SE 1.5.97, AE 1.6.1170 and Skyrim 1.7.x. Tap Sprint (or a dodge key, or Sneak) with a direction held and your character steps out of the way: a weighted step with the guard up, or a roll if you prefer. Eight directions, dodge in place, double tap if you want it (of the dodge key, or of a direction), a long roll, a stamina cost (flat or a share of max stamina), invincibility frames, attack cancel (light attacks only if you like, or only in the MCO/BFCO recovery window), dodge while sneaking, dodge with weapons sheathed (off by default), an optional perk lock and an on-dodge spell. Its own step dodges, diagonals, rolls and an open-hand unarmed set are included. Settings are on a menu page and in Simple Dodge.ini, in eleven languages.
 
 REQUIREMENTS
 - SKSE (SKSE 2.3.x for Skyrim 1.7.x)
@@ -11,8 +11,9 @@ REQUIREMENTS
 
 OPTIONAL
 - SKSE Menu Framework (or the Apocrypha Menu Framework) for the settings page; without it the INI is read at start.
-- Open Animation Replacer, for the unarmed set (used while both hands are empty).
+- Open Animation Replacer, for the unarmed set (used while both hands are empty, and for dodges with weapons sheathed).
 - IFrame Generator RE, for invincibility frames during the dodge.
+- Perk Entry Point Extender, so perks can change the dodge cost and invincibility time.
 - Behavior Data Injector, for the 'Only in the MCO/BFCO recovery window' option.
 
 COMPATIBILITY

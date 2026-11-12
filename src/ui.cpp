@@ -251,6 +251,8 @@ namespace Menu
 		}
 		Switch("SDG_NoForward", "Block forward dodge", S::remove_forward, "SDG_HelpNoForward", "Holding forward does not dodge.");
 		Switch("SDG_EightWay", "Eight-way dodging", S::eight_way, "SDG_HelpEightWay", "Diagonal directions get their own dodge. Off: the four main directions only. Needs Pandora run again.");
+		Switch("SDG_Sheathed", "Dodge with weapons sheathed", S::dodge_when_sheathed, "SDG_HelpSheathed",
+			"Dodge while your weapons are put away. Off: draw a weapon or spell to dodge. Needs Nemesis or Pandora run again.");
 		Switch("SDG_NoThird", "Only in first person", S::disable_in_third, "SDG_HelpNoThird", "Turns dodging off in third person.");
 		Slider("SDG_IFrames", "Invincibility time", S::i_frame_duration, 0.0F, 3.0F, "%.2f s", 0.05F, "SDG_HelpIFrames",
 			"How long you cannot be hit after a dodge starts. Needs IFrame Generator RE. Animations with their own i-frame annotations ignore this.");

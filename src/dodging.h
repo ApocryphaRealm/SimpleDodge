@@ -22,6 +22,7 @@ enum class DodgeResult : uint32_t
     kStamina,
     kOverencumbered,
     kNoDodgeBehavior,
+    kWeaponSheathed,
     kUnknown = 99,
 };
 
@@ -84,6 +85,9 @@ inline const char* DodgeResultToString(const DodgeResult result)
 
         case DodgeResult::kOverencumbered:
             return "Actor is overencumbered";
+
+        case DodgeResult::kWeaponSheathed:
+            return "Weapon is sheathed and bDodgeWhenSheathed is off";
 
         default:
             return "Unknown dodge result";
@@ -187,6 +191,7 @@ DodgeResult IsInWrongState(const RE::Actor* a_actor);     // Success if actor is
 DodgeResult HasStamina(RE::Actor* a_actor); // success if actor has enough stamina or actor is player in god mode
 DodgeResult IsOverencumbered(const RE::Actor* a_actor); // success if not overencumbered
 DodgeResult IsJumping(const RE::Actor* a_actor);        // kSuccess if actor is not jumping
+DodgeResult IsWeaponSheathed(const RE::Actor* a_actor); // kSuccess if drawn, or sheathed with bDodgeWhenSheathed on
 DodgeResult GetDodgeResult(RE::Actor* a_actor);         // get total dodge result
 bool IsInGodModeHelper(const RE::Actor* a_actor);
 bool CanAttackCancel(const RE::Actor* a_actor);
