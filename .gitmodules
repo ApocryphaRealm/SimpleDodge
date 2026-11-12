@@ -1,0 +1,3 @@
+[submodule "extern/clib-util"]
+	path = extern/clib-util
+	url = https://github.com/powerof3/CLibUtil

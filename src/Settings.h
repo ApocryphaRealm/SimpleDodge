@@ -1,0 +1,107 @@
+#pragma once
+
+// Simple Dodge settings. The code this grew from kept them in REX::TOML (two .toml files), which
+// the SE CommonLibSSE-NG does not have; they now live in Data\SKSE\Plugins\Simple Dodge.ini under the SAME
+// key names, read and written with plain file I/O (never the Win32 profile API - rule 16). Each value keeps
+// the original GetValue()/SetValue() shape so the dodge logic reads exactly as it did.
+
+#include "mod-data.h"
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+namespace Config
+{
+	template <class T>
+	struct Value
+	{
+		const char* section;
+		const char* key;
+		T           current;
+		T           def;
+
+		Value(const char* a_section, const char* a_key, T a_default) :
+			section(a_section), key(a_key), current(a_default), def(a_default)
+		{}
+
+		[[nodiscard]] T GetValue() const { return current; }
+		void            SetValue(T a_value) { current = a_value; }
+		void            Reset() { current = def; }
+	};
+
+	struct Settings : MOD
+	{
+		// [Settings]
+		inline static Value<bool>        enable_sneak_key_dodge{ "Settings", "bEnableSneakKeyDodge", false };
+		inline static Value<bool>        enable_dodge_in_place{ "Settings", "bEnableDodgeInPlace", true };
+		inline static Value<bool>        step_dodge{ "Settings", "bStepDodge", true };
+		inline static Value<bool>        enable_sneak_dodge{ "Settings", "bEnableSneakDodge", false };
+		inline static Value<bool>        enable_dodge_attack_cancel{ "Settings", "bEnableDodgeAttackCancel", true };
+		inline static Value<bool>        only_cancel_light{ "Settings", "bOnlyCancelLightAttacks", false };
+		inline static Value<float>       i_frame_duration{ "Settings", "fIFrameDuration", 0.3F };
+		inline static Value<std::string> default_dodge_event{ "Settings", "sDefaultDodgeEvent", std::string("TKDodgeBack") };
+		inline static Value<float>       sprinting_press_duration{ "Settings", "fSprintingPressDuration", 0.3F };
+		inline static Value<float>       sneaking_press_duration{ "Settings", "fSneakingPressDuration", 0.5F };
+		inline static Value<bool>        use_double_tap{ "Settings", "bUseDoubleTap", false };
+		inline static Value<bool>        disable_in_third{ "Settings", "bDisableInThird", false };
+		inline static Value<float>       dodge_cost{ "Settings", "fDodgeCost", 15.0F };
+		// Keyboard Left Shift (DirectInput 42), the classic default. SKSE key-code space: 0-255 keyboard,
+		// 256+ mouse, 266+ gamepad. 1 = unbound.
+		inline static Value<std::uint32_t> dodge_key{ "Settings", "uDodgeKey", 42u };
+		inline static Value<bool>        use_sprint_key{ "Settings", "bUseSprintKey", true };
+		inline static Value<bool>        use_mco_recover_window{ "Settings", "bUseMCORecoverWindow", false };
+		inline static Value<bool>        use_perk_lock{ "Settings", "bUsePerkLock", false };
+		inline static Value<bool>        use_percentage_cost{ "Settings", "bUsePercentageCost", true };
+		inline static Value<bool>        remove_forward{ "Settings", "bRemoveForwardDodge", false };
+		// 8-way (the owner, 2026-11-11): diagonals get their own dodge; off = the four main directions only
+		inline static Value<bool>        eight_way{ "Settings", "bEightWayDodge", true };
+		// How long after a menu CLOSES a dodge key press is ignored, in seconds.
+		//
+		// The menu-open check is not enough on its own: the press that closes a menu is delivered to gameplay in the
+		// same breath as the close, by which point the menu is no longer open and the press reads as a plain dodge.
+		// That is why exiting the journal dodged (the owner, 2026-09-16: "you dont dodge when exiting out of a menu -
+		// it currently dodges when exiting the journal but not the system tab") while exiting from the System tab,
+		// which closes a frame later, did not. 0 turns the guard off.
+		inline static Value<float>       menu_exit_grace{ "Settings", "fMenuExitGrace", 0.25F };
+
+		// [Forms]
+		inline static Value<std::string> dodge_perk_ID{ "Forms", "sDodgeRequiredPerkID", std::string("Simple Dodge.esp|0x800") };
+		inline static Value<std::string> on_dodge_spell_ID{ "Forms", "sOnDodgeSpellID", std::string("Simple Dodge.esp|0x802") };
+		inline static Value<std::string> on_dodge_spell_perk_ID{ "Forms", "sOnDodgeSpellRequiredPerkID", std::string("Simple Dodge.esp|0x801") };
+
+		// [Debug]
+		inline static Value<std::uint32_t> log_level{ "Debug", "uLogLevel", 0u };  // 0 = trace (project default)
+
+		// Reads the INI (a missing file keeps the compiled defaults). a_save=true writes every value back instead,
+		// replacing each key in place so comments and unknown keys survive. Kept as one function to match the
+		// original UpdateSettings(bool) call sites.
+		static bool UpdateSettings(bool a_save) noexcept;
+		static void RestoreDefaults() noexcept;
+		static void ApplyLogLevel() noexcept;
+		static const std::string& IniPath() noexcept;
+	};
+
+	struct Forms : MOD
+	{
+		inline static RE::SpellItem* dummyDodgeSpell = nullptr;
+		inline static RE::BGSPerk*   DodgePerkDummy = nullptr;
+		inline static RE::BGSPerk*   dummySpellLockPerk = nullptr;
+		inline static RE::SpellItem* onDodgeSpell = nullptr;
+		inline static RE::BGSPerk*   SpellLockPerk = nullptr;
+		inline static RE::BGSPerk*   ActualDodgePerk = nullptr;
+		inline static RE::TESGlobal* TDMGlobal = nullptr;
+
+		inline static const std::vector<std::string> MenuNames{
+			std::string(RE::BarterMenu::MENU_NAME),    std::string(RE::BookMenu::MENU_NAME),     std::string(RE::Console::MENU_NAME),
+			std::string(RE::ContainerMenu::MENU_NAME), std::string(RE::CraftingMenu::MENU_NAME), std::string(RE::DialogueMenu::MENU_NAME),
+			std::string(RE::FavoritesMenu::MENU_NAME), std::string(RE::GiftMenu::MENU_NAME),     std::string(RE::InventoryMenu::MENU_NAME),
+			std::string(RE::JournalMenu::MENU_NAME),   std::string(RE::LevelUpMenu::MENU_NAME),  std::string(RE::LockpickingMenu::MENU_NAME),
+			std::string(RE::MagicMenu::MENU_NAME),     std::string(RE::MapMenu::MENU_NAME),      std::string(RE::RaceSexMenu::MENU_NAME),
+			std::string(RE::SleepWaitMenu::MENU_NAME), std::string(RE::StatsMenu::MENU_NAME),    std::string(RE::TrainingMenu::MENU_NAME),
+			std::string(RE::TutorialMenu::MENU_NAME),  std::string(RE::TweenMenu::MENU_NAME),
+		};
+
+		static void LoadForms() noexcept;
+	};
+}

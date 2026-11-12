@@ -1,0 +1,8 @@
+		<hkobject name="#sdge$3" class="hkbStateMachineEventPropertyArray" signature="0xb07b4388">
+			<hkparam name="events" numelements="1">
+				<hkobject>
+					<hkparam name="id">$eventID[EndAnimatedCamera]$</hkparam>
+					<hkparam name="payload">#sdge$2</hkparam>
+				</hkobject>
+			</hkparam>
+		</hkobject>

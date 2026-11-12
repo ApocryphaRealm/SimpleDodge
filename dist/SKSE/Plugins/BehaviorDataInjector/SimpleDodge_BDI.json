@@ -1,0 +1,8 @@
+[
+    {
+        "projectPath": "Actors\\Character",
+        "type": "kBool",
+        "name": "DodgeCancelEnabled",
+        "value": true     
+    }
+]

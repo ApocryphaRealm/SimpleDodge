@@ -1,0 +1,12 @@
+{
+  "name": "simple-dodge-17",
+  "version-string": "1.0.0",
+  "description": "Simple Dodge - an SKSE dodge for Skyrim: four- or eight-way step dodges and rolls, sprint or sneak tap, stamina cost, i-frames, attack cancel, with a settings page on the Apocrypha Menu Framework [Skyrim 1.7.x build line: CommonLibSSE-NG 7.2.0, cmake/ports-17]",
+  "homepage": "https://github.com/ApocryphaRealm/SimpleDodge",
+  "license": "GPL-3.0-or-later",
+  "dependencies": [
+    "commonlibsse-ng",
+    "spdlog"
+  ],
+  "builtin-baseline": "127402f1c75bb3d5ff6bce04b285faa4930a5aca"
+}

@@ -1,0 +1,6 @@
+TKDodgeForwardLeft
+sdge$4
+1
+0
+0
+0

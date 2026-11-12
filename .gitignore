@@ -1,0 +1,24 @@
+build
+*ReSharper*
+.vs
+.idea
+contrib/Plugin*
+.vscode
+.xmake
+vsxmake2022
+anim-src/_frames/
+anim-src/_log_*.txt
+anim-src/_preview_scene.blend
+anim-src/_verify.json
+anim-src/_showcase_assets/
+anim-src/_showcase/
+anim-src/_frames_top/
+anim-src/_showcase_top/
+
+# Blender working files hold the vanilla skeleton and body meshes (Bethesda assets) - rebuilt locally by build_stepdodge.py, never published
+*.blend
+*.blend1
+anim-src/__pycache__/
+anim-src/_hero/
+anim-src/_showcase_follow/
+anim-src/gif-showcase/

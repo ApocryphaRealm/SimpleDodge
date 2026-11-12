@@ -1,0 +1,237 @@
+{
+ "ours": {
+  "duration": 0.8667,
+  "frames": 27,
+  "fps": 30.0,
+  "tracks": 99,
+  "blend_hint": 0,
+  "skeleton_name": "NPC Root [Root]",
+  "binding": 99,
+  "annotations": [
+   [
+    0.0,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.0667,
+    "animmotion 0 12.963 0"
+   ],
+   [
+    0.1333,
+    "animmotion 0 38.1847 0"
+   ],
+   [
+    0.2333,
+    "animmotion 0 90.7585 0"
+   ],
+   [
+    0.3667,
+    "animmotion 0 178.629 0"
+   ],
+   [
+    0.5333,
+    "animmotion 0 291.939 0"
+   ],
+   [
+    0.6333,
+    "animmotion 0 348.552 0"
+   ],
+   [
+    0.7,
+    "animmotion 0 376.935 0"
+   ],
+   [
+    0.7667,
+    "animmotion 0 395.209 0"
+   ],
+   [
+    0.8667,
+    "animmotion 0 409.283 0"
+   ]
+  ],
+  "animated_bones": [
+   "NPC COM [COM ]",
+   "NPC L Thigh [LThg]",
+   "NPC L Calf [LClf]",
+   "NPC L Foot [Lft ]",
+   "NPC R Thigh [RThg]",
+   "NPC R Calf [RClf]",
+   "NPC R Foot [Rft ]",
+   "NPC Spine [Spn0]",
+   "NPC Spine1 [Spn1]",
+   "NPC Spine2 [Spn2]",
+   "NPC L UpperArm [LUar]",
+   "NPC L Forearm [LLar]",
+   "NPC R UpperArm [RUar]",
+   "NPC R Forearm [RLar]",
+   "NPC Neck [Neck]",
+   "NPC Head [Head]",
+   "NPC R Toe0 [RToe]"
+  ],
+  "translating_bones": [
+   "NPC COM [COM ]"
+  ],
+  "root_track_static": true
+ },
+ "reference": {
+  "duration": 0.8667,
+  "frames": 27,
+  "fps": 30.0,
+  "tracks": 97,
+  "blend_hint": 0,
+  "skeleton_name": "NPC Root [Root]",
+  "binding": 0,
+  "annotations": [
+   [
+    0.0,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.0667,
+    "animmotion 0 12.963 0"
+   ],
+   [
+    0.1333,
+    "animmotion 0 38.1847 0"
+   ],
+   [
+    0.2333,
+    "animmotion 0 90.7585 0"
+   ],
+   [
+    0.3667,
+    "animmotion 0 178.629 0"
+   ],
+   [
+    0.5333,
+    "animmotion 0 291.939 0"
+   ],
+   [
+    0.6333,
+    "animmotion 0 348.552 0"
+   ],
+   [
+    0.7,
+    "animmotion 0 376.935 0"
+   ],
+   [
+    0.7667,
+    "animmotion 0 395.209 0"
+   ],
+   [
+    0.8667,
+    "animmotion 0 409.283 0"
+   ]
+  ],
+  "animated_bones": [
+   "NPC COM [COM ]",
+   "NPC Pelvis [Pelv]",
+   "NPC L Thigh [LThg]",
+   "NPC L Calf [LClf]",
+   "NPC L Foot [Lft ]",
+   "NPC R Thigh [RThg]",
+   "NPC R Calf [RClf]",
+   "NPC R Foot [Rft ]",
+   "SkirtRBone01",
+   "SkirtRBone02",
+   "SkirtRBone03",
+   "SkirtLBone01",
+   "SkirtLBone02",
+   "SkirtLBone03",
+   "SkirtBBone01",
+   "SkirtBBone02",
+   "SkirtBBone03",
+   "SkirtFBone01",
+   "SkirtFBone02",
+   "SkirtFBone03",
+   "NPC Spine [Spn0]",
+   "NPC Spine1 [Spn1]",
+   "NPC Spine2 [Spn2]",
+   "NPC L Clavicle [LClv]",
+   "NPC L UpperArm [LUar]",
+   "NPC L Forearm [LLar]",
+   "NPC R Clavicle [RClv]",
+   "NPC R UpperArm [RUar]",
+   "NPC R Forearm [RLar]",
+   "AnimObjectA",
+   "NPC Neck [Neck]",
+   "NPC Head [Head]",
+   "NPCEyeBone",
+   "NPC L Hand [LHnd]",
+   "NPC R Hand [RHnd]",
+   "NPC L Pauldron",
+   "NPC R Pauldron",
+   "MagicEffectsNode",
+   "NPC L Toe0 [LToe]",
+   "NPC L ForearmTwist1 [LLt1]",
+   "NPC L ForearmTwist2 [LLt2]",
+   "NPC L UpperarmTwist1 [LUt1]",
+   "NPC L UpperarmTwist2 [LUt2]",
+   "NPC R ForearmTwist1 [RLt1]",
+   "NPC R ForearmTwist2 [RLt2]",
+   "NPC R UpperarmTwist1 [RUt1]",
+   "NPC R UpperarmTwist2 [RUt2]"
+  ],
+  "translating_bones": [
+   "NPC COM [COM ]"
+  ],
+  "root_track_static": true
+ },
+ "reimport": {
+  "result": "set()",
+  "action": "sneakrun_forwardroll",
+  "frame_range": [
+   1.0,
+   27.0
+  ],
+  "markers": [
+   [
+    1,
+    "animmotion 0 0 0"
+   ],
+   [
+    3,
+    "animmotion 0 12.963 0"
+   ],
+   [
+    5,
+    "animmotion 0 38.1847 0"
+   ],
+   [
+    8,
+    "animmotion 0 90.7585 0"
+   ],
+   [
+    12,
+    "animmotion 0 178.629 0"
+   ],
+   [
+    17,
+    "animmotion 0 291.939 0"
+   ],
+   [
+    20,
+    "animmotion 0 348.552 0"
+   ],
+   [
+    22,
+    "animmotion 0 376.935 0"
+   ],
+   [
+    24,
+    "animmotion 0 395.209 0"
+   ],
+   [
+    27,
+    "animmotion 0 409.283 0"
+   ]
+  ],
+  "armature_bones": 99,
+  "bones_match_skeleton": true,
+  "hkx_bone_list_matches_skeleton_order": true,
+  "max_joint_error_units": 0.0354
+ },
+ "track_count_equals_skeleton": true,
+ "annotations_match_reference": true,
+ "duration_matches_motion_data": true
+}

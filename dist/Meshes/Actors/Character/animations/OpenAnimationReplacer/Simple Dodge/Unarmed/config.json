@@ -1,0 +1,9 @@
+{
+    "name": "Unarmed",
+    "description": "Step dodges and rolls with open hands and a raised guard (left hand in front, elbows bent), used only while both hands are empty. Low priority, so other dodge animation packs that use OAR win over it.",
+    "priority": 100,
+    "conditions": [
+        { "condition": "IsEquippedType", "requiredVersion": "1.0.0.0", "Type": { "value": 0.0 }, "Left hand": false },
+        { "condition": "IsEquippedType", "requiredVersion": "1.0.0.0", "Type": { "value": 0.0 }, "Left hand": true }
+    ]
+}
