@@ -16,7 +16,9 @@ OPTIONAL
 - Behavior Data Injector, for the 'Only in the MCO/BFCO recovery window' option.
 
 COMPATIBILITY
-Step-dodge replacer packs made for TK Dodge replace Simple Dodge's step dodges and rolls: the clip names, folder and dodge events are the same. Use Simple Dodge instead of another dodge SKSE plugin, not beside one - two would fire every dodge twice.
+- Dodge animation packs: Simple Dodge uses TK Dodge's file names, folder and dodge events, so step-dodge and roll packs made for TK Dodge replace its animations (install the pack after Simple Dodge). Step dodges: meshes\actors\character\animations\TKDodge\StepDodgeForward/Back/Left/Right.hkx. Rolls: animations\dodgeback.hkx, dodgeleft.hkx, dodgeright.hkx, sneakrun_forwardroll.hkx (forward). Diagonals (Simple Dodge's own): TKDodge\StepDodgeForwardLeft/ForwardRight/BackLeft/BackRight.hkx - switch Eight-way dodging off to use only a four-way pack's clips. Events: TKDodgeForward/Back/Left/Right (+ the four diagonal events). The unarmed set is an OAR submod at priority 100; an OAR pack with a higher priority wins.
+- Combat mods: tested with MCO and with BFCO (use one of the two). Run Pandora or Nemesis with the combat mod and Simple Dodge both ticked. 'Only in the MCO/BFCO recovery window' lets a dodge cancel an attack only once the combat mod opens its window for the next move (MCO_WinOpen / BFCO_NextWinStart and their power-attack versions) and needs Behavior Data Injector; with 'Only cancel light attacks' on, that rule is used instead.
+- Other dodge mods: use Simple Dodge instead of TK Dodge RE, TK Dodge NG or TK Dodge AIO, not beside them - two would fire every dodge twice. Untick TK Dodge's own behaviour patch in Pandora or Nemesis and run it again.
 
 INSTALL
 Install with your mod manager, pick your Skyrim version in the installer (SE / AE, or Skyrim 1.7.x), then run Pandora or Nemesis.
@@ -25,7 +27,7 @@ SETTINGS
 Journal > System > Mod Control Panel > Simple Dodge, or edit Data\SKSE\Plugins\Simple Dodge.ini. Changes on the page apply at once; Save keeps them.
 
 LOG
-Documents\My Games\Skyrim Special Edition\SKSE\Simple Dodge.log, at trace by default (uLogLevel=0). One line per hook with its address at start, and the reason whenever a dodge is refused.
+Documents\My Games\Skyrim Special Edition\SKSE\Simple Dodge.log, at info by default (uLogLevel=2). For a bug report set uLogLevel=0 (trace) and reproduce: the log then gives one line per hook with its address at start, and the reason whenever a dodge is refused.
 
 LICENCE
 GPL-3.0-or-later (LICENSE-SimpleDodge-GPL-3.0.txt). NOTICE.md and THIRD_PARTY_NOTICES.md carry every notice.

@@ -71,7 +71,7 @@ namespace Config
 		inline static Value<std::string> on_dodge_spell_perk_ID{ "Forms", "sOnDodgeSpellRequiredPerkID", std::string("Simple Dodge.esp|0x801") };
 
 		// [Debug]
-		inline static Value<std::uint32_t> log_level{ "Debug", "uLogLevel", 0u };  // 0 = trace (project default)
+		inline static Value<std::uint32_t> log_level{ "Debug", "uLogLevel", 2u };  // 2 = info (project default, rule 14)
 
 		// Reads the INI (a missing file keeps the compiled defaults). a_save=true writes every value back instead,
 		// replacing each key in place so comments and unknown keys survive. Kept as one function to match the

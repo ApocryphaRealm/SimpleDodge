@@ -26,7 +26,7 @@ Maxsu, Loop and FBplus (MIT). Their copyright and credit are kept in full below.
 - Settings moved from REX::TOML to `Simple Dodge.ini` (same key names), read and written with plain file I/O.
 - The settings page is drawn on the Apocrypha Menu Framework: on/off switches, translation keys, AMF reserved keys
   refused at key capture.
-- Trace logging by default with a level header; one log line per hook with its address; null checks on every lookup.
+- Info logging by default (uLogLevel=0 for everything) with a level header; one log line per hook with its address; null checks on every lookup.
 - New step dodges, diagonal step dodges, rolls and an unarmed set of our own; our own light plugin `Simple Dodge.esp`.
 - The behaviour patch runs under its own patch code `sdge`; the dodge event, variable and clip names are kept so other
   dodge animation packs still line up.
