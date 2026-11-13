@@ -1,5 +1,13 @@
 # Changelog - Simple Dodge
 
+## 1.3.0 - 2026-11-13 - working
+
+### Changed
+- Block forward dodge is on by default: holding forward no longer dodges (turn it off on the settings page or with bRemoveForwardDodge in Simple Dodge.ini). An existing Simple Dodge.ini keeps its own value.
+
+### Fixed
+- The DLL is built without link-time code generation, so antivirus scanners using the Bitdefender engine no longer flag it as a false positive (Gen:Variant.Ulise), which had held the 1.2.0 download in Nexus's quarantine. No change in game.
+
 ## 1.2.0 - 2026-11-13 - working
 
 ### Added
