@@ -3,6 +3,7 @@
 ## 1.2.0 - 2026-11-12 - untested
 
 ### Added
+- Installer page Compatibility: Bow Rapid Combo V3 keeps its own bow dodges by default (its back, left and right flips); choose 'Use Simple Dodge's bow steps over Bow Rapid Combo V3' to get Simple Dodge's bow steps in every direction.
 - Chain a step into a roll (off by default; bChainStepToRoll, fChainWindowStart): press dodge again once the step has played past the window (40% by default) and it becomes a roll in the newly pressed direction, charged like any dodge. Once per chain - a roll never chains, a press before the window does nothing. Needs Nemesis or Pandora run again.
 - Step dodges hold your weapon: eleven sets through Open Animation Replacer, each holding that weapon type's own combat grip through all eight directions - one-handed weapons and daggers (left hand empty or a torch), one-handed with a shield, dual wield, greatsword, battleaxe and warhammer, bow, crossbow, staff, and spells in the right, left or both hands. Used only with the weapon drawn; rolls are shared.
 - Dodge sound (off by default; bDodgeSound): a short whoosh when your dodge starts. The sound is sDodgeSoundID in the INI, by default the game's bare-hand swing (Skyrim.esm WPNSwingUnarmed).

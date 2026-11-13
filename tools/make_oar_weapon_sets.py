@@ -15,6 +15,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(REPO, "anim-src", "weapons")
 OAR = os.path.join(REPO, "dist", "Meshes", "Actors", "Character", "animations", "OpenAnimationReplacer", "Simple Dodge")
 DIRS = ["Left", "Right", "Forward", "Back", "ForwardLeft", "ForwardRight", "BackLeft", "BackRight"]
+BRC_OVERRIDE_PRIORITY = 9901700
 ONE_H = [1, 2, 3, 4]
 SPELLS = [12, 13, 14, 15, 16, 17]
 
@@ -63,6 +64,18 @@ def main():
                "priority": prio, "conditions": [DRAWN] + conds}
         open(os.path.join(dst, "config.json"), "w", newline="\r\n").write(json.dumps(cfg, indent=4) + "\n")
         print("%-20s %d  8 clips" % (folder, prio))
+        if folder == "Bow":
+            # The installer's Compatibility option (the owner, 2026-11-12: "No rapid bow combo should win by default unless
+            # they want ours to win in the installer"): an OAR user.json beside this config.json shadows it WHOLE, so it is
+            # the same config with only the priority raised above Bow Rapid Combo V3 (Base 2 9901001, TK Dodge Rear
+            # 9901661/9901662). Written here so it can never drift from the Bow config it shadows.
+            u = dict(cfg); u["priority"] = BRC_OVERRIDE_PRIORITY
+            u["description"] = cfg["description"] + " (Installer option: priority %d, above Bow Rapid Combo V3.)" % BRC_OVERRIDE_PRIORITY
+            ud = os.path.join(REPO, "fomod-options", "Compat-BowRapidComboV3", "Meshes", "Actors", "Character", "animations",
+                              "OpenAnimationReplacer", "Simple Dodge", "Bow")
+            os.makedirs(ud, exist_ok=True)
+            open(os.path.join(ud, "user.json"), "w", newline="\r\n").write(json.dumps(u, indent=4) + "\n")
+            print("  + fomod-options Compat-BowRapidComboV3 user.json at priority %d" % BRC_OVERRIDE_PRIORITY)
 
 
 if __name__ == "__main__":

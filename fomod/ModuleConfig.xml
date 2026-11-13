@@ -70,5 +70,28 @@
 				</group>
 			</optionalFileGroups>
 		</installStep>
+		<installStep name="Compatibility">
+			<optionalFileGroups order="Explicit">
+				<group name="Bow Rapid Combo V3 (Archer Combat Overhaul)" type="SelectExactlyOne">
+					<plugins order="Explicit">
+						<plugin name="Bow Rapid Combo V3 keeps its bow dodges">
+							<description>With a bow drawn, Bow Rapid Combo V3's own back, left and right dodges (its flips) play, and Simple Dodge's bow step plays forward and on the diagonals. Pick this if you do not use Bow Rapid Combo V3, or want its flips. Installs nothing.</description>
+							<typeDescriptor>
+								<type name="Recommended" />
+							</typeDescriptor>
+						</plugin>
+						<plugin name="Use Simple Dodge's bow steps over Bow Rapid Combo V3">
+							<description>With a bow drawn, every dodge direction plays Simple Dodge's grounded bow step instead of Bow Rapid Combo V3's flips. Its bow attacks and other animations are not touched. Installs an Open Animation Replacer user.json that raises Simple Dodge's Bow set to priority 9901700.</description>
+							<files>
+								<folder source="Compat-BowRapidComboV3" destination="" priority="1" />
+							</files>
+							<typeDescriptor>
+								<type name="Optional" />
+							</typeDescriptor>
+						</plugin>
+					</plugins>
+				</group>
+			</optionalFileGroups>
+		</installStep>
 	</installSteps>
 </config>

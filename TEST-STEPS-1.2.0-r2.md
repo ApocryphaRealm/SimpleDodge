@@ -8,10 +8,7 @@ B-20261112-181917-d389.
 1. Njordlinger, profile **Njordlinger Test**. Reinstall **test Simple Dodge 1.2.0** from this package
    (install-test-build.py). FOMOD: Line-SE-AE16, step distance **Normal**. Keep **test Simple Dodge 1.1.0**,
    **test TK Dodge AIO 1.1.0** and **unpublished TK Dodge AIO** disabled.
-2. **Bow override (needed for the bow checks):** create the MO2 mod **Simple Dodge - Bow priority override (test)**,
-   placed after test Simple Dodge 1.2.0. Copy `D:\Claude output\6. current wip mods\SimpleDodge\compat\bow-rapid-combo-v3\user.json`
-   to `meshes\actors\character\animations\OpenAnimationReplacer\Simple Dodge\Bow\user.json` inside it. This raises our Bow
-   set to priority 9901700, above Bow Rapid Combo V3's submods. Without it, BRC's flips play for back/left/right (round 1).
+2. **Bow Rapid Combo V3 (installer page "Compatibility"):** for B1 install with **Use Simple Dodge's bow steps over Bow Rapid Combo V3**. It puts an OAR user.json beside Simple Dodge's Bow config.json, raising it to priority 9901700. For B2 reinstall with the default **Bow Rapid Combo V3 keeps its bow dodges**, which installs nothing. Bow Rapid Combo V3 itself stays enabled for both. No separate override mod is needed.
 3. **Behaviour regeneration (required, the patch changed):**
    - `py -3 "D:\Claude output\.MD\scripts\gates\pandora-active-patches-gate.py" --fix`
    - Run `D:\Modlists\Njordlinger\mods\Pandora Behaviour Engine Plus\Pandora Behaviour Engine+.exe` through MO2
@@ -30,10 +27,10 @@ B-20261112-181917-d389.
 ## Checks (game state -> action -> EXPECTED)
 
 ### Bow (8 directions)
-- **B1** Bow drawn, the override from setup step 2 in place, step dodge on, eight-way on, third person. Dodge in all 8
+- **B1** Installer option "Use Simple Dodge's bow steps over Bow Rapid Combo V3". Bow drawn, step dodge on, eight-way on, third person. Dodge in all 8
   directions; save frames.
   EXPECTED: each is a grounded step holding the bow (bow_idledrawn grip), no flips. Back is about 318 units, not 508.
-- **B2** The same with the override mod disabled.
+- **B2** Reinstalled with the default "Bow Rapid Combo V3 keeps its bow dodges" (no user.json in the Bow folder), the same 8 dodges.
   EXPECTED: back, left and right play Bow Rapid Combo V3's flips (its "Base 2", priority 9901001); forward and the
   diagonals are ours. This confirms the cause.
 
