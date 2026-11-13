@@ -53,7 +53,7 @@ namespace Config
 		inline static Value<bool>        use_mco_recover_window{ "Settings", "bUseMCORecoverWindow", false };
 		inline static Value<bool>        use_perk_lock{ "Settings", "bUsePerkLock", false };
 		inline static Value<bool>        use_percentage_cost{ "Settings", "bUsePercentageCost", true };
-		inline static Value<bool>        remove_forward{ "Settings", "bRemoveForwardDodge", false };
+		inline static Value<bool>        remove_forward{ "Settings", "bRemoveForwardDodge", true };
 		// 8-way (the owner, 2026-11-11): diagonals get their own dodge; off = the four main directions only
 		inline static Value<bool>        eight_way{ "Settings", "bEightWayDodge", true };
 		// Double-tap a movement key, or flick the left stick twice, to dodge that way (1.1.0, a player's request,
