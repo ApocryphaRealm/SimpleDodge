@@ -1,0 +1,35 @@
+{
+    "name": "Claws (Animated Armoury)",
+    "description": "Step dodges holding the weapon: Animated Armoury claws in either hand (WeapTypeClaw). Only while the weapon is drawn. Rolls are not replaced. Never plays if that mod is not installed.",
+    "priority": 136,
+    "conditions": [
+        {
+            "condition": "IsWeaponDrawn",
+            "requiredVersion": "1.0.0.0"
+        },
+        {
+            "condition": "OR",
+            "requiredVersion": "1.0.0.0",
+            "Conditions": [
+                {
+                    "condition": "IsEquippedHasKeyword",
+                    "requiredVersion": "1.0.0.0",
+                    "Keyword": {
+                        "pluginName": "NewArmoury.esp",
+                        "formID": "19AAB4"
+                    },
+                    "Left hand": false
+                },
+                {
+                    "condition": "IsEquippedHasKeyword",
+                    "requiredVersion": "1.0.0.0",
+                    "Keyword": {
+                        "pluginName": "NewArmoury.esp",
+                        "formID": "19AAB4"
+                    },
+                    "Left hand": true
+                }
+            ]
+        }
+    ]
+}

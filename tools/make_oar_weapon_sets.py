@@ -49,6 +49,55 @@ SETS = [  # folder, priority, description, conditions (all ANDed, plus weapon dr
     ("MagicBoth", 120, "Spells or scrolls in both hands.", [any_of(SPELLS), any_of(SPELLS, left=True)]),
 ]
 
+# Keyword sets for the Animated Armoury / Heavy Armory weapon types (the owner, 2026-11-12). Conditioned on the weapon's
+# KEYWORD, so a pike uses the pike set rather than the greatsword set it would get by its vanilla type; priorities
+# 131-154, above the vanilla-type sets (110-120). ONE SOURCE PLUGIN PER SUBMOD: a keyword whose plugin is not loaded does
+# not resolve, OAR marks that condition invalid and the submod never plays - kept per source, a missing mod costs only
+# its own submod, never another source's. Heavy Armory's and OCF's keywords are injected into Update.esm's id range
+# (their FormIDs carry Update.esm's index), so they are looked up as Update.esm forms; OCF (Object Categorization
+# Framework) keywords are shared by every mod that uses OCF.
+def kw(plugin, fid, left=False):
+    return {"condition": "IsEquippedHasKeyword", "requiredVersion": "1.0.0.0",
+            "Keyword": {"pluginName": plugin, "formID": fid}, "Left hand": left}
+
+def any_kw(plugin, fids, left=False):
+    return kw(plugin, fids[0], left) if len(fids) == 1 else \
+        {"condition": "OR", "requiredVersion": "1.0.0.0", "Conditions": [kw(plugin, f, left) for f in fids]}
+
+AA, UPD = "NewArmoury.esp", "Update.esm"
+KEYWORD_SETS = [  # submod folder, clips (anim-src/weapons/<set>), priority, description, conditions
+    ("Halberd (Animated Armoury)", "Halberd", 131, "Animated Armoury halberds (WeapTypeHalberd).", [any_kw(AA, ["E4580"])]),
+    ("Pike (Animated Armoury)", "Pike", 132, "Animated Armoury pikes and spears (WeapTypePike, WeapTypeSpear).", [any_kw(AA, ["E457E", "E457F"])]),
+    ("QtrStaff (Animated Armoury)", "QtrStaff", 133, "Animated Armoury quarterstaves (WeapTypeQtrStaff).", [any_kw(AA, ["E4581"])]),
+    ("Rapier (Animated Armoury)", "Rapier", 134, "Animated Armoury rapiers (WeapTypeRapier).", [any_kw(AA, ["801"])]),
+    ("Katana (Animated Armoury)", "Katana", 135, "Animated Armoury katanas (WeapTypeKatana).", [any_kw(AA, ["344733"])]),
+    ("Claws (Animated Armoury)", "Claws", 136, "Animated Armoury claws in either hand (WeapTypeClaw).",
+     [{"condition": "OR", "requiredVersion": "1.0.0.0", "Conditions": [kw(AA, "19AAB4"), kw(AA, "19AAB4", left=True)]}]),
+    ("Halberd (Heavy Armory)", "Halberd", 141, "Heavy Armory halberds and glaives (ShWeapTypeHalberd, ShWeapTypeGlaive).", [any_kw(UPD, ["B07778", "B07777"])]),
+    ("Pike (Heavy Armory)", "Pike", 142, "Heavy Armory spears and tridents (ShWeapTypeSpear, ShWeapTypeTrident).", [any_kw(UPD, ["B07776", "B07779"])]),
+    ("QtrStaff (Heavy Armory)", "QtrStaff", 143, "Heavy Armory quarterstaves (ShWeapTypeQuarterStaff).", [any_kw(UPD, ["B07780"])]),
+    ("Halberd (OCF)", "Halberd", 151, "Two-handed swing polearms tagged by Object Categorization Framework (OCF_WeapTypePole2H_Swing).", [any_kw(UPD, ["777773"])]),
+    ("Pike (OCF)", "Pike", 152, "Two-handed thrust polearms tagged by OCF (OCF_WeapTypePole2H_Thrust).", [any_kw(UPD, ["777772"])]),
+    ("QtrStaff (OCF)", "QtrStaff", 153, "Two-handed quarterstaves tagged by OCF (OCF_WeapTypeQuarterstaff2H).", [any_kw(UPD, ["777775"])]),
+    ("Katana (OCF)", "Katana", 154, "One-handed katanas tagged by OCF (OCF_WeapTypeKatana1H).", [any_kw(UPD, ["777779"])]),
+]
+
+
+def write_keyword_sets():
+    for folder, clips, prio, desc, conds in KEYWORD_SETS:
+        dst = os.path.join(OAR, folder)
+        os.makedirs(os.path.join(dst, "TKDodge"), exist_ok=True)
+        for d in DIRS:
+            src = os.path.join(SRC, clips, "StepDodge%s.hkx" % d)
+            if not os.path.isfile(src):
+                raise SystemExit("missing %s - build it first (build_stepdodge.py -- build verify %s%s)" % (src, d, clips))
+            shutil.copyfile(src, os.path.join(dst, "TKDodge", "StepDodge%s.hkx" % d))
+        cfg = {"name": folder, "description": "Step dodges holding the weapon: " + desc +
+               " Only while the weapon is drawn. Rolls are not replaced. Never plays if that mod is not installed.",
+               "priority": prio, "conditions": [DRAWN] + conds}
+        open(os.path.join(dst, "config.json"), "w", newline="\r\n").write(json.dumps(cfg, indent=4) + "\n")
+        print("%-28s %d  8 clips (%s)" % (folder, prio, clips))
+
 
 def main():
     for folder, prio, desc, conds in SETS:
@@ -80,3 +129,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    write_keyword_sets()

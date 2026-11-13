@@ -1,0 +1,20 @@
+{
+    "name": "Rapier (Animated Armoury)",
+    "description": "Step dodges holding the weapon: Animated Armoury rapiers (WeapTypeRapier). Only while the weapon is drawn. Rolls are not replaced. Never plays if that mod is not installed.",
+    "priority": 134,
+    "conditions": [
+        {
+            "condition": "IsWeaponDrawn",
+            "requiredVersion": "1.0.0.0"
+        },
+        {
+            "condition": "IsEquippedHasKeyword",
+            "requiredVersion": "1.0.0.0",
+            "Keyword": {
+                "pluginName": "NewArmoury.esp",
+                "formID": "801"
+            },
+            "Left hand": false
+        }
+    ]
+}

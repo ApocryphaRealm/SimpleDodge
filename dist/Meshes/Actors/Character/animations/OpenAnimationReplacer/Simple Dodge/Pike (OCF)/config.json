@@ -1,0 +1,20 @@
+{
+    "name": "Pike (OCF)",
+    "description": "Step dodges holding the weapon: Two-handed thrust polearms tagged by OCF (OCF_WeapTypePole2H_Thrust). Only while the weapon is drawn. Rolls are not replaced. Never plays if that mod is not installed.",
+    "priority": 152,
+    "conditions": [
+        {
+            "condition": "IsWeaponDrawn",
+            "requiredVersion": "1.0.0.0"
+        },
+        {
+            "condition": "IsEquippedHasKeyword",
+            "requiredVersion": "1.0.0.0",
+            "Keyword": {
+                "pluginName": "Update.esm",
+                "formID": "777772"
+            },
+            "Left hand": false
+        }
+    ]
+}

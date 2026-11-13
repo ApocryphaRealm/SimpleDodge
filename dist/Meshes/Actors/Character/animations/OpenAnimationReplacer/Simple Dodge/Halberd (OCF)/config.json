@@ -1,0 +1,20 @@
+{
+    "name": "Halberd (OCF)",
+    "description": "Step dodges holding the weapon: Two-handed swing polearms tagged by Object Categorization Framework (OCF_WeapTypePole2H_Swing). Only while the weapon is drawn. Rolls are not replaced. Never plays if that mod is not installed.",
+    "priority": 151,
+    "conditions": [
+        {
+            "condition": "IsWeaponDrawn",
+            "requiredVersion": "1.0.0.0"
+        },
+        {
+            "condition": "IsEquippedHasKeyword",
+            "requiredVersion": "1.0.0.0",
+            "Keyword": {
+                "pluginName": "Update.esm",
+                "formID": "777773"
+            },
+            "Left hand": false
+        }
+    ]
+}

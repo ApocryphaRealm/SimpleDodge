@@ -791,8 +791,70 @@ def grip_locals(spec):
             res[i] = Matrix.Translation(t_) @ q.to_matrix().to_4x4()
     return res
 
+# ---- our own grips for the Animated Armoury / Heavy Armory weapon types (the owner, 2026-11-12) -----------------------
+# Authored here from LOOKING at each type's idle (render_reference.py), not taken from that mod's animation data: a pole
+# grip is the weapon's direction and the right hand's grip point in the chest's rest frame, and where the left hand
+# holds the shaft (spread units along the pole from the right hand) or, for one-handed blades, an explicit left wrist
+# point. The arms reach those points with the same two-bone IK as the guard; the Weapon node keeps the hand's position
+# and turns its +Y (every weapon mesh's long axis, measured from the nifs) along the pole, rolled by roll degrees.
+POLES = {
+    # head up, haft nearly upright in front, right hand at the chest, left hand lower on the haft
+    "Halberd":  dict(grip=(5.0, 24.0, 96.0), dir=(0.10, 0.25, 1.0), spread=-24.0, roll=0.0),
+    # held low at the right hip, point forward and up across the body, left hand forward on the shaft
+    "Pike":     dict(grip=(15.0, 14.0, 90.0), dir=(-0.15, 0.85, 0.45), spread=6.0, roll=0.0),
+    # across the body, rising to the left, hands about shoulder-width apart
+    "QtrStaff": dict(grip=(16.0, 18.0, 84.0), dir=(-0.85, 0.15, 0.50), spread=44.0, roll=0.0),
+    # blade forward at chest height, arm out; the left hand back at the hip
+    "Rapier":   dict(grip=(14.0, 34.0, 96.0), dir=(0.0, 1.0, 0.15), left=(-16.0, -6.0, 82.0), roll=90.0),
+}
+WEAPON_TYPE_GRIPS = {   # sets riding a vanilla idle (the game's own data)
+    "Katana": {"R": ("2hm_idle", None, 0.0), "L": ("2hm_idle", None, 0.0)},     # two-handed, as the greatsword
+    "Claws":  {"R": ("h2h_idle", None, 0.0), "L": ("h2h_idle", None, 0.0)},     # fists up, claws on them
+}
+
+def pole_frame(pg, Gch, G0ch):
+    """World rotation of the Weapon node: +Y along the pole, +X rolled about it."""
+    Rc = Gch.to_3x3() @ G0ch.to_3x3().inverted()
+    y = (Rc @ Vector(pg["dir"])).normalized()
+    up = (Rc @ Vector((0, 0, 1)))
+    x = y.cross(up)
+    if x.length < 1e-4: x = y.cross(Rc @ Vector((0, 1, 0)))
+    x.normalize()
+    x = (Matrix.Rotation(radians(pg.get("roll", 0.0)), 3, y) @ x).normalized()
+    z = x.cross(y).normalized()
+    return Matrix((x, y, z)).transposed()
+
+def pole_wrist_target(pg, side, Gch, G0ch):
+    """Wrist target (world) that puts that hand's palm node on the grip point / the shaft."""
+    Rc = Gch.to_3x3() @ G0ch.to_3x3().inverted()
+    grip = Gch @ (G0ch.inverted() @ Vector(pg["grip"]))
+    d = (Rc @ Vector(pg["dir"])).normalized()
+    if side == "R":
+        return grip + Rc @ (P0("NPC R Hand [RHnd]") - P0("Weapon"))
+    if "left" in pg:
+        return Gch @ (G0ch.inverted() @ Vector(pg["left"]))
+    return grip + d * pg["spread"] + Rc @ (P0("NPC L Hand [LHnd]") - P0("Shield"))
+
+GRIPS.update(WEAPON_TYPE_GRIPS)
+for _set, _pg in POLES.items():
+    os.makedirs(os.path.join(OUT, "weapons", _set), exist_ok=True)
+    for _k in STEP_DIRS:
+        _w = copy.copy(DESIGNS[_k]); _w.grip_set = _set; _w.pole = _pg
+        _w.name = _k + _set; _w.file = os.path.join("weapons", _set, DESIGNS[_k].file)
+        DESIGNS[_w.name] = _w
+# BEFORE for the new types: what each gets today - its vanilla-type set (pike: greatsword; halberd and quarterstaff:
+# battleaxe; rapier and katana: one-handed; claws: dual wield), with the new type's weapon in hand
+ARMOURY_TODAY = {"Halberd": "BattleaxeWarhammer", "Pike": "Greatsword", "QtrStaff": "BattleaxeWarhammer",
+                 "Rapier": "OneHanded", "Katana": "OneHanded", "Claws": "DualWield"}
+for _new, _old in ARMOURY_TODAY.items():
+    for _k in STEP_DIRS:
+        _b = copy.copy(DESIGNS[_k]); _b.grip_set = _old; _b.grip_spec = GRIPS[_old]; _b.weapon_show = _new
+        _b.name = _k + _new + "Before"; _b.file = os.path.join("weapons", "_before", _new, DESIGNS[_k].file)
+        os.makedirs(os.path.join(OUT, "weapons", "_before", _new), exist_ok=True)
+        DESIGNS[_b.name] = _b
+
 os.makedirs(os.path.join(OUT, "weapons"), exist_ok=True)
-for _set in list(GRIPS) + ["Dagger", "Warhammer"]:       # BEFORE: today's open-guard step, the same weapons in hand
+for _set in [s for s in GRIPS if s not in WEAPON_TYPE_GRIPS] + ["Dagger", "Warhammer"]:       # BEFORE: today's open-guard step, the same weapons in hand
     for _k in STEP_DIRS:
         _b = copy.copy(DESIGNS[_k]); _b.weapon_show = _set
         _b.name = _k + _set + "Before"; _b.file = os.path.join("weapons", "_before", _set, DESIGNS[_k].file)
@@ -1007,6 +1069,9 @@ def _solve_pose(D, f, dz=0.0):
                     base = (LH_GUARD_UNARMED if side == "L" else RH_GUARD_UNARMED).lerp(base, w)
                 tgt_rest = base + Vector((D.v(pre + "_dx", f), D.v(pre + "_dy", f), D.v(pre + "_dz", f)))
                 tgt = G[ch] @ (G0[ch].inverted() @ tgt_rest)
+                pg = getattr(D, "pole", None)
+                if pg is not None:                     # our own pole / blade grip (2026-11-12, weapon-type sets)
+                    tgt = pole_wrist_target(pg, side, G[ch], G0[ch])
                 s = G[i].translation
                 s0, e0, w0 = P0(BN[ua]), P0(BN[fa]), P0(BN[ha])
                 l1, l2 = (e0 - s0).length, (w0 - e0).length
@@ -1019,6 +1084,8 @@ def _solve_pose(D, f, dz=0.0):
                 Rl = chain_rot((w0 - e0).normalized(), -(e0 - s0).normalized(), (wr - el).normalized(), -(el - s).normalized())
                 G[i] = Matrix.Translation(s) @ (Ru @ B0[ua]).to_4x4()
                 over[fa] = (el, Rl)
+        if name == "Weapon" and getattr(D, "pole", None) is not None:
+            G[i] = Matrix.Translation(G[i].translation) @ pole_frame(D.pole, G[IDX["NPC Spine2 [Spn2]"]], G0[IDX["NPC Spine2 [Spn2]"]]).to_4x4()
         # head level and facing forward: neck takes half of the chest's rotation back out, the head all of it
         if name == "NPC Neck [Neck]":
             acc = (G[par].to_3x3() @ B0[par].transposed()).to_quaternion()
@@ -1189,6 +1256,18 @@ WEAPON_MESHES = {
     "Staff":              [("Weapon", "weapons/iron/tempironstaff.nif")],
 }
 
+# the Animated Armoury weapon meshes, for the review renders of the new types only (render only, never shipped; the
+# owner's download, SIMPLEDODGE_ARMOURY_MESHES)
+ARMOURY_MESHES = os.environ.get("SIMPLEDODGE_ARMOURY_MESHES", r"D:\Claude output\_work\untrusted-downloads\nexus-35978-236456\x\AnimatedArmouryDAR SSE\Data\Meshes\weapons\NewArmoury")
+WEAPON_MESHES.update({
+    "Halberd":  [("Weapon", os.path.join(ARMOURY_MESHES, "Halberds", "IronHalberd.nif"))],
+    "Pike":     [("Weapon", os.path.join(ARMOURY_MESHES, "Pikes", "IronPike.nif"))],
+    "QtrStaff": [("Weapon", os.path.join(ARMOURY_MESHES, "QuarterStaffs", "ImperialStaff.nif"))],
+    "Rapier":   [("Weapon", os.path.join(ARMOURY_MESHES, "Rapier", "IronRapier.nif"))],
+    "Katana":   [("Weapon", os.path.join(ARMOURY_MESHES, "Katana", "IronKatana.nif"))],
+    "Claws":    [("Weapon", os.path.join(ARMOURY_MESHES, "Fists", "IronClaw.nif")), ("Shield", os.path.join(ARMOURY_MESHES, "Fists", "IronClawLft.nif"))],
+})
+
 def _import_nif_meshes(path):
     before = set(bpy.data.objects)
     for o in bpy.context.selected_objects: o.select_set(False)
@@ -1214,8 +1293,8 @@ def add_weapon_proxies(D, arma):
     if meshes:
         sc = bpy.context.scene; sc.frame_set(1)
         for node, rel in meshes:
-            path = os.path.join(VANILLA_MESHES, *rel.split("/"))
-            if not os.path.exists(path): say("weapon mesh missing", path); continue
+            path = rel if os.path.isabs(rel) else os.path.join(VANILLA_MESHES, *rel.split("/"))   # absolute: render_reference
+            if not os.path.exists(path): say("weapon mesh missing", path); print("weapon mesh missing", path); continue
             pb = arma.pose.bones[node]
             W = arma.matrix_world @ pb.matrix
             for o in _import_nif_meshes(path):
