@@ -1,6 +1,6 @@
 # Changelog - Simple Dodge
 
-## 1.2.0 - 2026-11-12 - untested
+## 1.2.0 - 2026-11-13 - working
 
 ### Added
 - Eight-way dodging in first person (a request from 1m0ws on Nexus): the four diagonal step dodges now have their own first-person animations in all three first-person behaviours (weapon drawn, weapons sheathed, magic). Before, a diagonal in first person played the straight forward or back dodge. Each diagonal sways and tilts the view along its own direction, built from the straight first-person dodges on either side of it, and travels the same distance as the third-person diagonal (with or without Animation Motion Revolution, and shortened by the installer's Shorter step distance). Needs Nemesis or Pandora run again.
