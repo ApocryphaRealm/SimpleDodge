@@ -237,7 +237,13 @@ bool CanDodge(RE::Actor* a_actor)
     {
         return true;
     }
-    logger::debug("Dodge failed because of: {}", DodgeResultToString(result));
+    // once per press and reason: the buffer re-checks every frame, and the 1.2.0 round-2 test logged "Already dodging"
+    // 23 times for one press during a step with the chain off
+    if (buffer.lastRefusal != static_cast<int>(result))
+    {
+        buffer.lastRefusal = static_cast<int>(result);
+        logger::debug("Dodge failed because of: {}", DodgeResultToString(result));
+    }
     // A refusal that waiting out the buffer's 0.4 s will not fix drops the press instead of re-checking - and re-logging
     // - it every frame: sheathed (drawing counts as sheathed until it ends), over carry weight, not enough stamina, no
     // perk, no dodge behaviour. The 1.2.0 test logged 483 lines for about 20 presses while overencumbered.
@@ -249,6 +255,17 @@ bool CanDodge(RE::Actor* a_actor)
         case DodgeResult::kHasNoPerk:
         case DodgeResult::kNoDodgeBehavior:
             buffer.clear();
+            break;
+        case DodgeResult::kIsDodging:
+            // the press is kept only while the dodge in progress will end inside the buffer's window (a press just
+            // before the landing still dodges again); a dodge that outlasts the window cannot be waited out, so the
+            // press is dropped here instead of being refused on every frame until it expires
+            if (g_cur.active)
+            {
+                const float played = std::chrono::duration<float>(CurrentDodge::Clock::now() - g_cur.start).count();
+                if (g_cur.duration - played > buffer.remaining())
+                    buffer.clear();
+            }
             break;
         default:
             break;
@@ -740,7 +757,15 @@ bool DoDodge(RE::Actor* a_actor)
     if (iStep != 2)
     {
         iStep = RollStep(a_actor);
-        if (iStep == 0 && Config::Settings::long_roll.GetValue())
+        // The first-person graphs carry no long roll (1.2.0): there the standard roll plays without a warning. The
+        // warning stays for a third-person graph without it, which means the behaviour was not generated again.
+        const auto* cam      = RE::PlayerCamera::GetSingleton();
+        const bool firstPerson = Compat::IsPlayer(a_actor) && cam && cam->IsInFirstPerson();
+        if (iStep == 0 && Config::Settings::long_roll.GetValue() && firstPerson)
+        {
+            logger::debug("Dodge: first person has no long roll - the standard roll plays");
+        }
+        else if (iStep == 0 && Config::Settings::long_roll.GetValue())
         {
             static bool warned = false;
             if (!warned)

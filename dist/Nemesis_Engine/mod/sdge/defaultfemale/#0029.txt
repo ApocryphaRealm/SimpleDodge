@@ -1667,6 +1667,10 @@
 				<hkcstring>Animations\TKDodge\StepDodgeForwardRight.hkx</hkcstring>
 				<hkcstring>Animations\TKDodge\StepDodgeBackLeft.hkx</hkcstring>
 				<hkcstring>Animations\TKDodge\StepDodgeBackRight.hkx</hkcstring>
+				<hkcstring>Animations\TKDodge\LongRollForward.hkx</hkcstring>
+				<hkcstring>Animations\TKDodge\LongRollBack.hkx</hkcstring>
+				<hkcstring>Animations\TKDodge\LongRollLeft.hkx</hkcstring>
+				<hkcstring>Animations\TKDodge\LongRollRight.hkx</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="animationFilenames" numelements="0"></hkparam>

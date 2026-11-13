@@ -105,12 +105,22 @@ struct DodgeInputBuffer
     bool queued      = false;
     bool checkedOnce = false;
     bool fired       = false;
+    int lastRefusal  = -1;   // the refusal already logged for this press: each reason is logged once per press
 
     void push()
     {
-        queuedAt = Clock::now();
-        queued   = true;
-        fired    = false;
+        queuedAt    = Clock::now();
+        queued      = true;
+        fired       = false;
+        lastRefusal = -1;
+    }
+
+    // seconds left before this press expires
+    [[nodiscard]] float remaining() const
+    {
+        if (!queued)
+            return 0.0f;
+        return std::chrono::duration<float>(INPUT_BUFFER_TIME - (Clock::now() - queuedAt)).count();
     }
 
     [[nodiscard]] bool expired() const

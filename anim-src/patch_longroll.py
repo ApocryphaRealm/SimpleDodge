@@ -1,7 +1,8 @@
 """Long roll - a second, longer-travelling roll in the Simple Dodge behaviour patch (1.1.0, 2026-11-12).
 
 Why: a player (Nexus posts, 2026-11-12): "for the roll dodge it makes more sense to cover more ground as you roll".
-How far a dodge travels is not in the .hkx - Skyrim moves the character by the animationdatasinglefile MOTION DATA
+Without Animation Motion Revolution, Skyrim moves the character by the animationdatasinglefile MOTION DATA (with it,
+by the clip's own animmotion annotations: since 1.2.0 the long roll has its own files, tools/make_clip_motion.py)
 of the clip generator's NAME. Each direction's roll and step clip shared one name (TKDodgeLeft, ...), so the roll
 went exactly as far as the step (251 / 300 / 409 units, TK Dodge RE's values). This script adds, per graph with a
 dodge selector (1hm_behavior, magicbehavior):
