@@ -179,7 +179,7 @@
 					<hkparam name="eventId">$eventID[TKDodgeForwardLeft]$</hkparam>
 					<hkparam name="toStateId">5695600</hkparam>
 					<hkparam name="fromNestedStateId">0</hkparam>
-					<hkparam name="toNestedStateId">4</hkparam>
+					<hkparam name="toNestedStateId">5</hkparam>
 					<hkparam name="priority">0</hkparam>
 					<hkparam name="flags">FLAG_TO_NESTED_STATE_ID_IS_VALID</hkparam>
 				</hkobject>
@@ -205,7 +205,7 @@
 					<hkparam name="eventId">$eventID[TKDodgeForwardRight]$</hkparam>
 					<hkparam name="toStateId">5695600</hkparam>
 					<hkparam name="fromNestedStateId">0</hkparam>
-					<hkparam name="toNestedStateId">4</hkparam>
+					<hkparam name="toNestedStateId">6</hkparam>
 					<hkparam name="priority">0</hkparam>
 					<hkparam name="flags">FLAG_TO_NESTED_STATE_ID_IS_VALID</hkparam>
 				</hkobject>
@@ -231,7 +231,7 @@
 					<hkparam name="eventId">$eventID[TKDodgeBackLeft]$</hkparam>
 					<hkparam name="toStateId">5695600</hkparam>
 					<hkparam name="fromNestedStateId">0</hkparam>
-					<hkparam name="toNestedStateId">3</hkparam>
+					<hkparam name="toNestedStateId">7</hkparam>
 					<hkparam name="priority">0</hkparam>
 					<hkparam name="flags">FLAG_TO_NESTED_STATE_ID_IS_VALID</hkparam>
 				</hkobject>
@@ -257,7 +257,7 @@
 					<hkparam name="eventId">$eventID[TKDodgeBackRight]$</hkparam>
 					<hkparam name="toStateId">5695600</hkparam>
 					<hkparam name="fromNestedStateId">0</hkparam>
-					<hkparam name="toNestedStateId">3</hkparam>
+					<hkparam name="toNestedStateId">8</hkparam>
 					<hkparam name="priority">0</hkparam>
 					<hkparam name="flags">FLAG_TO_NESTED_STATE_ID_IS_VALID</hkparam>
 				</hkobject>

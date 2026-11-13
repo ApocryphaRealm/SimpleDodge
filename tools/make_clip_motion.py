@@ -17,7 +17,9 @@ from the previous run.
   3. Shorter option (fomod-options\\Step-Shorter\\Meshes): a copy of every step clip (the base TKDodge set and every
      Open Animation Replacer set) and of the four standard rolls, each axis scaled like the Shorter motion data
      (forward x0.7, back x0.6, sideways x0.8; a diagonal's parts each by their own direction). The long rolls are
-     not copied: they keep their length, as the option says.
+     not copied: they keep their length, as the option says. The first-person diagonals
+     (_1stperson\\animations\\TKDodge\\StepDodge<Diagonal>.hkx, anim-src\\build_fp_diagonals.py, 2026-11-13) get Shorter
+     copies the same way; the first-person straight dodges are the game's own clips and ship no file.
 Then checks every result with clip_motion.final against its motion data (the check the package gate also runs).
 Usage: python make_clip_motion.py
 """
@@ -34,6 +36,8 @@ SDGE = os.path.join(DIST, "Nemesis_Engine", "mod", "sdge")
 MD = os.path.join(SDGE, "animationdatasinglefile", "DefaultMale~1")
 SHORT = os.path.join(REPO, "fomod-options", "Step-Shorter")
 SHORT_ANIM = os.path.join(SHORT, "Meshes", "Actors", "Character", "animations")
+FP_ANIM = os.path.join(DIST, "Meshes", "Actors", "Character", "_1stperson", "animations")
+SHORT_FP_ANIM = os.path.join(SHORT, "Meshes", "Actors", "Character", "_1stperson", "animations")
 FORWARD, BACK, SIDE = 0.7, 0.6, 0.8
 # roll file, its standard motion entry, its long motion entry, the axis it travels on
 ROLLS = {"Left": ("dodgeleft.hkx", "sdge$2", "sdge$10", 0), "Right": ("dodgeright.hkx", "sdge$3", "sdge$11", 0),
@@ -118,6 +122,11 @@ def main():
         if not (base.startswith("stepdodge") or base in [v[0] for v in ROLLS.values()]):
             raise SystemExit("unknown clip %s - decide whether Shorter scales it" % rel)
         CM.rewrite(p, os.path.join(SHORT_ANIM, rel), shorter); n += 1
+    for p in glob.glob(os.path.join(FP_ANIM, "**", "*.hkx"), recursive=True):   # the first-person diagonals
+        rel = os.path.relpath(p, FP_ANIM)
+        if not os.path.basename(p).lower().startswith("stepdodge"):
+            raise SystemExit("unknown first-person clip %s - decide whether Shorter scales it" % rel)
+        CM.rewrite(p, os.path.join(SHORT_FP_ANIM, rel), shorter); n += 1
     report.append("Shorter: %d clips" % n)
     print("\n".join(report))
 

@@ -1,0 +1,63 @@
+{
+ "name": "BackRight",
+ "duration": 0.9,
+ "frames": 28,
+ "tracks": 99,
+ "skeleton_name": "NPC Root [Root]",
+ "source_skeleton_name": "NPC Root [Root]",
+ "blend_hint": 0,
+ "source_blend_hint": 0,
+ "frames_match": true,
+ "tracks_equal_skeleton": true,
+ "max_track_translation_error": 0.0001,
+ "max_track_rotation_error_deg": 0.0,
+ "worst": null,
+ "annotations": [
+  [
+   0.0,
+   "animmotion 0 0 0"
+  ],
+  [
+   0.0667,
+   "animmotion 22.5 -22.5 0"
+  ],
+  [
+   0.1,
+   "animmotion 39.4 -39.4 0"
+  ],
+  [
+   0.2333,
+   "animmotion 80.4 -80.4 0"
+  ],
+  [
+   0.5333,
+   "animmotion 176.9 -176.9 0"
+  ],
+  [
+   0.6667,
+   "animmotion 198.0 -198.0 0"
+  ],
+  [
+   0.7,
+   "animmotion 198.0 -198.0 0"
+  ]
+ ],
+ "annotations_match": true,
+ "camera_tilt_max_deg": 7.95,
+ "root_sway_max": 16.43,
+ "cam1_z_every_5": [
+  120.5,
+  120.5,
+  120.5,
+  120.5,
+  120.5,
+  120.5
+ ],
+ "motion_data": "sdge$3",
+ "motion_end": [
+  0.7,
+  198.0,
+  -198.0
+ ],
+ "PASS": true
+}

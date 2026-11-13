@@ -1,0 +1,71 @@
+{
+ "name": "BackLeft",
+ "duration": 0.9,
+ "frames": 28,
+ "tracks": 99,
+ "skeleton_name": "NPC Root [Root]",
+ "source_skeleton_name": "NPC Root [Root]",
+ "blend_hint": 0,
+ "source_blend_hint": 0,
+ "frames_match": true,
+ "tracks_equal_skeleton": true,
+ "max_track_translation_error": 0.0001,
+ "max_track_rotation_error_deg": 0.0,
+ "worst": null,
+ "annotations": [
+  [
+   0.0,
+   "animmotion 0 0 0"
+  ],
+  [
+   0.1667,
+   "animmotion 0.0 0.0 0"
+  ],
+  [
+   0.2333,
+   "animmotion -18.1 -18.1 0"
+  ],
+  [
+   0.2667,
+   "animmotion -35.4 -35.4 0"
+  ],
+  [
+   0.4333,
+   "animmotion -90.4 -90.4 0"
+  ],
+  [
+   0.7,
+   "animmotion -168.4 -168.4 0"
+  ],
+  [
+   0.8,
+   "animmotion -192.2 -192.2 0"
+  ],
+  [
+   0.8333,
+   "animmotion -196.7 -196.7 0"
+  ],
+  [
+   0.8667,
+   "animmotion -198.0 -198.0 0"
+  ]
+ ],
+ "annotations_match": true,
+ "camera_tilt_max_deg": 10.38,
+ "root_sway_max": 16.43,
+ "cam1_z_every_5": [
+  120.5,
+  120.5,
+  120.5,
+  120.5,
+  120.5,
+  120.5
+ ],
+ "motion_data": "sdge$2",
+ "motion_end": [
+  0.86667,
+  -198.0,
+  -198.0
+ ],
+ "PASS": true
+}

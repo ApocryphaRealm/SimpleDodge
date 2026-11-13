@@ -13,6 +13,8 @@ both an x and a y part, so each part takes its own direction's factor (forward-l
   sdge$8..11 long rolls                         - not touched
   FirstPerson~1 346 back, 347 left, 348 right, 791 forward - the first-person rolls; round 2 (2026-11-13) measured
                                                 first person unchanged by Shorter because these were left out
+  FirstPerson~1 sdge$0..3                       - the first-person diagonals (2026-11-13), the third-person diagonal
+                                                motion under the first-person project's own ids
 
 With Animation Motion Revolution the clips' own annotations move the character instead of this motion data, so the
 option also ships scaled clips: make_clip_motion.py writes them (fomod-options/Step-Shorter/Meshes).
@@ -30,7 +32,7 @@ DST = os.path.join(REPO, "fomod-options", "Step-Shorter", "Nemesis_Engine", "mod
 FORWARD, BACK, SIDE = 0.7, 0.6, 0.8
 ENTRIES = {"DefaultMale~1": ["sdge$%d" % n for n in range(0, 8)],
            "DefaultFemale~1": ["sdge$%d" % n for n in range(0, 8)],
-           "FirstPerson~1": ["346", "347", "348", "791"]}
+           "FirstPerson~1": ["346", "347", "348", "791"] + ["sdge$%d" % n for n in range(0, 4)]}
 
 
 def scale(tok, f):

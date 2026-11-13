@@ -3,6 +3,7 @@
 ## 1.2.0 - 2026-11-12 - untested
 
 ### Added
+- Eight-way dodging in first person (a request from 1m0ws on Nexus): the four diagonal step dodges now have their own first-person animations in all three first-person behaviours (weapon drawn, weapons sheathed, magic). Before, a diagonal in first person played the straight forward or back dodge. Each diagonal sways and tilts the view along its own direction, built from the straight first-person dodges on either side of it, and travels the same distance as the third-person diagonal (with or without Animation Motion Revolution, and shortened by the installer's Shorter step distance). Needs Nemesis or Pandora run again.
 - Dodge while sprinting (on by default; bDodgeWhileSprinting, a Nexus request): dodge from a sprint, and out of a sprint attack the same way other attacks can be dodged out of (bEnableDodgeAttackCancel, bUseMCORecoverWindow). Before, a dodge while sprinting was refused; turn the setting off for that.
 - Step dodges for Animated Armoury, Heavy Armory and OCF-tagged weapons, picked by the weapon's keyword: halberds and glaives, pikes, spears and tridents, quarterstaves, rapiers, katanas and claws each hold their weapon through all eight directions. Each set only plays when its mod is installed.
 - Installer page Compatibility: Bow Rapid Combo V3 keeps its own bow dodges by default (its back, left and right flips); choose 'Use Simple Dodge's bow steps over Bow Rapid Combo V3' to get Simple Dodge's bow steps in every direction.

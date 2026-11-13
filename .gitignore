@@ -27,3 +27,9 @@ anim-src/gif-showcase/
 _work/
 anim-src/weapons/_before/
 anim-src/weapons/_review/
+
+# first-person diagonals (build_fp_diagonals.py): review frames, logs and videos are rebuilt locally
+anim-src/firstperson/_frames/
+anim-src/firstperson/_log_*.txt
+anim-src/firstperson/_render_stdout.txt
+anim-src/firstperson/mp4/

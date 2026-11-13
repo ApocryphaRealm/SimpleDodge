@@ -1,0 +1,71 @@
+{
+ "name": "ForwardLeft",
+ "duration": 1.0,
+ "frames": 31,
+ "tracks": 99,
+ "skeleton_name": "NPC Root [Root]",
+ "source_skeleton_name": "NPC Root [Root]",
+ "blend_hint": 0,
+ "source_blend_hint": 0,
+ "frames_match": true,
+ "tracks_equal_skeleton": true,
+ "max_track_translation_error": 0.0001,
+ "max_track_rotation_error_deg": 0.0396,
+ "worst": [
+  11,
+  "NPC R Thigh [RThg]"
+ ],
+ "annotations": [
+  [
+   0.0,
+   "animmotion 0 0 0"
+  ],
+  [
+   0.0667,
+   "animmotion -20.7 20.7 0"
+  ],
+  [
+   0.1,
+   "animmotion -40.5 40.5 0"
+  ],
+  [
+   0.2667,
+   "animmotion -103.3 103.3 0"
+  ],
+  [
+   0.5333,
+   "animmotion -192.5 192.5 0"
+  ],
+  [
+   0.6333,
+   "animmotion -219.6 219.6 0"
+  ],
+  [
+   0.6667,
+   "animmotion -224.7 224.7 0"
+  ],
+  [
+   0.7,
+   "animmotion -226.3 226.3 0"
+  ]
+ ],
+ "annotations_match": true,
+ "camera_tilt_max_deg": 9.56,
+ "root_sway_max": 8.46,
+ "cam1_z_every_5": [
+  101.5,
+  92.5,
+  101.6,
+  96.3,
+  101.5,
+  99.3,
+  101.5
+ ],
+ "motion_data": "sdge$0",
+ "motion_end": [
+  0.7,
+  -226.3,
+  226.3
+ ],
+ "PASS": true
+}
