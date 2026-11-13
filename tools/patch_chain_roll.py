@@ -6,14 +6,19 @@ mt_behavior graphs are generated from 1hm by anim-src/patch_sheathed.py, so run 
   * the event SDGChainRoll (eventNames + eventInfos, in the patch's own MOD_CODE blocks);
   * on the dodge's nested state machine (SimpleDodge_Behavior, the one holding the direction states), a local
     wildcard transition on SDGChainRoll to that graph's FORWARD dodge state, allowed from any state including the
-    forward state itself (FLAG_ALLOW_SELF_TRANSITION_BY_TRANSITION_FROM_ANY_STATE, and the machine's self-transition
-    mode set to blend), using the same blend effect the root's forward dodge transition uses.
+    forward state itself (FLAG_ALLOW_SELF_TRANSITION_BY_TRANSITION_FROM_ANY_STATE; the machine's own
+    selfTransitionMode stays NO_TRANSITION - BLEND is not one of its values, see below), using the same blend effect the root's forward dodge transition uses.
 The DLL sends SDGChainRoll only inside the chain window of a step dodge, after setting iStep to the roll (so the
 forward state's selector picks the roll) and turning the player to the stick direction - every roll is the forward
 roll (item 9). Once per chain is the DLL's rule; the graph would accept the event again.
 Idempotent: a graph that already has SDGChainRoll is left alone.
 Usage: python patch_chain_roll.py [<Nemesis_Engine\\mod\\sdge>]
 """
+# hkbStateMachine::selfTransitionMode takes only NO_TRANSITION, TRANSITION_TO_START_STATE and
+# FORCE_TRANSITION_TO_START_STATE. 1.2.0 first set it to SELF_TRANSITION_MODE_BLEND (a value of the transition
+# EFFECT's enum): Pandora logged "Enum does not contain SELF_TRANSITION_MODE_BLEND", dropped every new node of the
+# patch (SimpleDodgeState included) and the game crashed loading a save in MT_RootBehavior (batch
+# B-20261112-200853-f998). The wildcard's own flag allows the forward state to re-enter itself; nothing else is needed.
 import os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -101,7 +106,6 @@ def patch(graph, log):
     new_id = max(nodes) + 1
     new = "#sdge$%d" % new_id
     s = s.replace('<hkparam name="wildcardTransitions">null</hkparam>', '<hkparam name="wildcardTransitions">%s</hkparam>' % new)
-    s = s.replace("SELF_TRANSITION_MODE_NO_TRANSITION", "SELF_TRANSITION_MODE_BLEND")
     wr(sm, s)
     body = nl3.join(['\t\t<hkobject name="%s" class="hkbStateMachineTransitionInfoArray" signature="0xe397b11e">' % new,
                      '\t\t\t<hkparam name="transitions" numelements="1">', row(nl3, effect, fwd), "\t\t\t</hkparam>",
