@@ -1,0 +1,20 @@
+{
+    "name": "QtrStaff (Heavy Armory)",
+    "description": "Step dodges holding the weapon: Heavy Armory quarterstaves (ShWeapTypeQuarterStaff). Only while the weapon is drawn. Rolls are not replaced. Never plays if that mod is not installed.",
+    "priority": 143,
+    "conditions": [
+        {
+            "condition": "IsWeaponDrawn",
+            "requiredVersion": "1.0.0.0"
+        },
+        {
+            "condition": "IsEquippedHasKeyword",
+            "requiredVersion": "1.0.0.0",
+            "Keyword": {
+                "pluginName": "Update.esm",
+                "formID": "B07780"
+            },
+            "Left hand": false
+        }
+    ]
+}

@@ -1,0 +1,35 @@
+{
+    "name": "Pike (Heavy Armory)",
+    "description": "Step dodges holding the weapon: Heavy Armory spears and tridents (ShWeapTypeSpear, ShWeapTypeTrident). Only while the weapon is drawn. Rolls are not replaced. Never plays if that mod is not installed.",
+    "priority": 142,
+    "conditions": [
+        {
+            "condition": "IsWeaponDrawn",
+            "requiredVersion": "1.0.0.0"
+        },
+        {
+            "condition": "OR",
+            "requiredVersion": "1.0.0.0",
+            "Conditions": [
+                {
+                    "condition": "IsEquippedHasKeyword",
+                    "requiredVersion": "1.0.0.0",
+                    "Keyword": {
+                        "pluginName": "Update.esm",
+                        "formID": "B07776"
+                    },
+                    "Left hand": false
+                },
+                {
+                    "condition": "IsEquippedHasKeyword",
+                    "requiredVersion": "1.0.0.0",
+                    "Keyword": {
+                        "pluginName": "Update.esm",
+                        "formID": "B07779"
+                    },
+                    "Left hand": false
+                }
+            ]
+        }
+    ]
+}

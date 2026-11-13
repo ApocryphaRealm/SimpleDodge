@@ -169,7 +169,7 @@
   "armature_bones": 99,
   "bones_match_skeleton": true,
   "hkx_bone_list_matches_skeleton_order": true,
-  "max_joint_error_units": 0.0545
+  "max_joint_error_units": 0.0506
  },
  "track_count_equals_skeleton": true,
  "annotations_match_reference": true,
