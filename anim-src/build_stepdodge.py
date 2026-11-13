@@ -797,18 +797,25 @@ def grip_locals(spec):
 # holds the shaft (spread units along the pole from the right hand) or, for one-handed blades, an explicit left wrist
 # point. The arms reach those points with the same two-bone IK as the guard; the Weapon node keeps the hand's position
 # and turns its +Y (every weapon mesh's long axis, measured from the nifs) along the pole, rolled by roll degrees.
+# 2026-11-13 (the owner, playing: "The spear dodge animation swaps the weapon direction unlike the vanilla weapons. Make
+# it similar."): each grip is now where the idle the weapon stands in holds it - the weapon's direction, the right
+# hand's grip point, the roll and the left hand's place, measured with measure_idle_grip.py from Animated Armoury's own
+# idles (numbers only) - so the dodge starts and ends with the weapon the way the idle has it, as the vanilla-type sets
+# do. check_weapon_continuity.py fails a set whose weapon axis differs from its idle's by more than 20 degrees. Before,
+# the pike pointed forward and up from the hip while the idle holds it upright across the body (78 degrees apart).
+# Halberd and quarterstaff take the pike stance: Animated Armoury's own halberd and quarterstaff idles were not read.
+_AA_POLE = dict(grip=(6.8, 22.9, 77.0), dir=(-0.773, -0.222, 0.595), spread=39.1, roll=-156.6, left_roll=121.9)
 POLES = {
-    # head up, haft nearly upright in front, right hand at the chest, left hand lower on the haft
-    "Halberd":  dict(grip=(4.0, 25.0, 96.0), dir=(0.10, 0.25, 1.0), spread=-14.0, roll=0.0),
-    # held low at the right hip, point forward and up across the body, left hand forward on the shaft
-    "Pike":     dict(grip=(15.0, 14.0, 90.0), dir=(-0.15, 0.85, 0.45), spread=14.0, roll=0.0),
-    # across the body, rising to the left, hands about shoulder-width apart
-    "QtrStaff": dict(grip=(13.0, 22.0, 96.0), dir=(-0.85, 0.25, 0.45), spread=44.0, roll=0.0),
-    # blade forward at chest height, arm out; the left hand back at the hip
-    "Rapier":   dict(grip=(13.0, 26.0, 96.0), dir=(0.0, 1.0, 0.15), left=(-16.0, -6.0, 82.0), roll=90.0),
+    # upright across the body, point up and to the left, right hand low at the hip, left hand high on the shaft
+    "Halberd":  dict(_AA_POLE),
+    "Pike":     dict(_AA_POLE),
+    "QtrStaff": dict(_AA_POLE),
+    # blade forward and up at the right, the left hand back at the hip (off the blade)
+    "Rapier":   dict(grip=(30.9, 19.3, 77.0), dir=(0.441, 0.745, 0.501), left=(-18.4, 21.3, 82.8), roll=-86.1),
+    # two hands on the hilt in front, the blade up and forward
+    "Katana":   dict(grip=(-1.2, 29.7, 81.1), dir=(-0.052, 0.620, 0.783), spread=-9.8, roll=-79.8, left_roll=127.7),
 }
 WEAPON_TYPE_GRIPS = {   # sets riding a vanilla idle (the game's own data)
-    "Katana": {"R": ("2hm_idle", None, 0.0), "L": ("2hm_idle", None, 0.0)},     # two-handed, as the greatsword
     "Claws":  {"R": ("h2h_idle", None, 0.0), "L": ("h2h_idle", None, 0.0)},     # fists up, claws on them
 }
 
@@ -1251,6 +1258,12 @@ PROXIES = {
     "MagicRight":         [("NPC R MagicNode [RMag]", "ball", 0, 0, 5.0)],
     "MagicLeft":          [("NPC L MagicNode [LMag]", "ball", 0, 0, 5.0)],
     "MagicBoth":          [("NPC R MagicNode [RMag]", "ball", 0, 0, 5.0), ("NPC L MagicNode [LMag]", "ball", 0, 0, 5.0)],
+    # the Animated Armoury types, when that mod's meshes are not on disk (they are another author's, kept only in _work)
+    "Pike":               [("Weapon", "box", -70, 150, 2.0), ("Weapon", "head", 150, 172, 4.0)],
+    "Halberd":            [("Weapon", "box", -60, 125, 2.2), ("Weapon", "head", 100, 128, 10.0)],
+    "QtrStaff":           [("Weapon", "box", -90, 90, 2.2)],
+    "Katana":             [("Weapon", "box", -18, 85, 2.0)],
+    "Rapier":             [("Weapon", "box", -6, 85, 1.2)],
 }
 
 # The game's own weapon meshes for the review renders (render only; never shipped): unpacked from Skyrim - Meshes0/1.bsa
@@ -1304,6 +1317,11 @@ def _import_nif_meshes(path):
 def add_weapon_proxies(D, arma):
     show = getattr(D, "weapon_show", None) or getattr(D, "grip_set", None)
     meshes = WEAPON_MESHES.get(show)
+    def _p(rel): return rel if os.path.isabs(rel) else os.path.join(VANILLA_MESHES, *rel.split("/"))
+    if meshes and not all(os.path.exists(_p(rel)) for node, rel in meshes):   # another mod's meshes recycled: proxies
+        say("weapon mesh missing - drawing the proxy for", show); meshes = None; forced = True
+    else:
+        forced = False
     if meshes:
         sc = bpy.context.scene; sc.frame_set(1)
         for node, rel in meshes:
@@ -1322,7 +1340,7 @@ def add_weapon_proxies(D, arma):
     sc = bpy.context.scene; sc.frame_set(1)
     mat = bpy.data.materials.new("weapon"); mat.diffuse_color = (0.30, 0.42, 0.62, 1)
     for node, kind, a, b, th in spec:
-        if kind != "ball": continue          # only the spell hands still use stand-ins
+        if kind != "ball" and not forced: continue   # only the spell hands (and missing meshes) use stand-ins
         pb = arma.pose.bones[node]
         W = arma.matrix_world @ pb.matrix
         if kind in ("box", "head"):

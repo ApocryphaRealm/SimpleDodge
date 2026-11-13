@@ -73,17 +73,20 @@ KEYWORD_SETS = [  # submod folder, clips (anim-src/weapons/<set>), priority, des
     ("Katana (Animated Armoury)", "Katana", 135, "Animated Armoury katanas (WeapTypeKatana).", [any_kw(AA, ["344733"])]),
     ("Claws (Animated Armoury)", "Claws", 136, "Animated Armoury claws in either hand (WeapTypeClaw).",
      [{"condition": "OR", "requiredVersion": "1.0.0.0", "Conditions": [kw(AA, "19AAB4"), kw(AA, "19AAB4", left=True)]}]),
-    ("Halberd (Heavy Armory)", "Halberd", 141, "Heavy Armory halberds and glaives (ShWeapTypeHalberd, ShWeapTypeGlaive).", [any_kw(UPD, ["B07778", "B07777"])]),
-    ("Pike (Heavy Armory)", "Pike", 142, "Heavy Armory spears and tridents (ShWeapTypeSpear, ShWeapTypeTrident).", [any_kw(UPD, ["B07776", "B07779"])]),
-    ("QtrStaff (Heavy Armory)", "QtrStaff", 143, "Heavy Armory quarterstaves (ShWeapTypeQuarterStaff).", [any_kw(UPD, ["B07780"])]),
-    ("Halberd (OCF)", "Halberd", 151, "Two-handed swing polearms tagged by Object Categorization Framework (OCF_WeapTypePole2H_Swing).", [any_kw(UPD, ["777773"])]),
-    ("Pike (OCF)", "Pike", 152, "Two-handed thrust polearms tagged by OCF (OCF_WeapTypePole2H_Thrust).", [any_kw(UPD, ["777772"])]),
-    ("QtrStaff (OCF)", "QtrStaff", 153, "Two-handed quarterstaves tagged by OCF (OCF_WeapTypeQuarterstaff2H).", [any_kw(UPD, ["777775"])]),
-    ("Katana (OCF)", "Katana", 154, "One-handed katanas tagged by OCF (OCF_WeapTypeKatana1H).", [any_kw(UPD, ["777779"])]),
+    # Heavy Armory (141-143) and OCF (151-154) sets REMOVED 2026-11-13: those weapons carry a vanilla animation type
+    # and stand in the vanilla two-handed (or one-handed) idle, so a set posed on Animated Armoury's stance turned the
+    # weapon at the start and end of every dodge (the owner, playing, with a Spear of Skyrim spear: "The spear dodge
+    # animation swaps the weapon direction unlike the vanilla weapons"). They now get the vanilla-type set of their
+    # animation type, which holds the weapon exactly as that idle does.
 ]
+REMOVED = ["Halberd (Heavy Armory)", "Pike (Heavy Armory)", "QtrStaff (Heavy Armory)", "Halberd (OCF)", "Pike (OCF)",
+           "QtrStaff (OCF)", "Katana (OCF)"]
 
 
 def write_keyword_sets():
+    for folder in REMOVED:
+        if os.path.isdir(os.path.join(OAR, folder)):
+            shutil.rmtree(os.path.join(OAR, folder)); print("removed %s" % folder)
     for folder, clips, prio, desc, conds in KEYWORD_SETS:
         dst = os.path.join(OAR, folder)
         os.makedirs(os.path.join(dst, "TKDodge"), exist_ok=True)
