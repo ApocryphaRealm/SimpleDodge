@@ -4,6 +4,7 @@
 
 #include "API/PerkEntryPointExtenderAPI.h"
 #include "RollHeading.h"
+#include "API/TrueDirectionalMovementAPI.h"
 #include "Settings.h"
 #include "Utility.h"
 #include "mod-data.h"
@@ -27,7 +28,8 @@ struct CurrentDodge
     using Clock = std::chrono::steady_clock;
     bool active = false;
     bool step = false;          // a step dodge, so a chain may follow
-    bool chained = false;       // a chained roll: nothing may chain from it
+    bool chained = false;       // a chained roll (kept for the log)
+    int chainStage = 0;         // 0 the dodge itself, 1 the chained short roll, 2 the chained long roll (the last)
     Clock::time_point start{};
     float duration = 0.8f;      // the clip's length in seconds
     Clock::time_point chargedAt{};   // a chained roll charged its own stamina here
@@ -45,6 +47,54 @@ static float StepDuration(const std::string& a_event)
 // Every roll is the forward roll, the body turned first to where the stick points (1.2.0, item 9). The input is
 // camera-relative: the camera's yaw is the player's heading, plus the third-person orbit offset while free rotation is
 // on (weapon sheathed). Dodge in place (no input) rolls straight ahead, no turn.
+// True Directional Movement turns a target-locked player back to the target every frame, so a roll turned to the stick
+// went toward the enemy whatever the stick said (the owner, round 3, 2026-11-13). TDM's API hands out control of the
+// player's yaw (RequestYawControl / SetPlayerYaw / ReleaseYawControl, speed multiplier 0 = instant): the roll holds it
+// for its length and gives it back, so TDM resumes facing the target once the roll is over. Main thread only.
+static TDM_API::IVTDM2* g_tdm = nullptr;
+static bool g_tdmYaw = false;
+static float g_tdmYawTarget = 0.0f;
+static std::chrono::steady_clock::time_point g_tdmYawUntil{};
+
+void InitTDM()
+{
+    g_tdm = reinterpret_cast<TDM_API::IVTDM2*>(TDM_API::RequestPluginAPI(TDM_API::InterfaceVersion::V2));
+    logger::info("True Directional Movement API: {}", g_tdm ? "found - rolls take its yaw control while they play" :
+                                                              "not loaded (rolls turn the player directly)");
+}
+
+static void HoldRollYaw(float a_yaw, float a_seconds)
+{
+    if (!g_tdm)
+        return;
+    const auto handle = SKSE::GetPluginHandle();
+    const auto res = g_tdmYaw ? TDM_API::APIResult::AlreadyGiven : g_tdm->RequestYawControl(handle, 0.0f);
+    if (res != TDM_API::APIResult::OK && res != TDM_API::APIResult::AlreadyGiven)
+    {
+        logger::debug("Roll: True Directional Movement kept its yaw control (result {})", static_cast<int>(res));
+        return;
+    }
+    g_tdmYaw = true;
+    g_tdmYawTarget = a_yaw;
+    g_tdmYawUntil = std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(a_seconds * 1000));
+    g_tdm->SetPlayerYaw(handle, a_yaw);
+}
+
+static void KeepRollYaw()
+{
+    if (!g_tdmYaw || !g_tdm)
+        return;
+    const auto handle = SKSE::GetPluginHandle();
+    if (std::chrono::steady_clock::now() < g_tdmYawUntil)
+    {
+        g_tdm->SetPlayerYaw(handle, g_tdmYawTarget);
+        return;
+    }
+    g_tdm->ReleaseYawControl(handle);
+    g_tdmYaw = false;
+    logger::debug("Roll: yaw control given back to True Directional Movement");
+}
+
 static void TurnForRoll(RE::Actor* a_actor)
 {
     if (!a_actor || !g_hasInput)
@@ -59,6 +109,8 @@ static void TurnForRoll(RE::Actor* a_actor)
     const float from = a_actor->data.angle.z;
     const float target = RollHeading::Target(camYaw, g_input.x, g_input.y);
     a_actor->SetHeading(target);
+    if (Compat::IsPlayer(a_actor))
+        HoldRollYaw(target, 1.0f);   // the roll clips are 0.7-0.87 s
     logger::debug("Roll: turned from {:.2f} to {:.2f} (camera {:.2f}, input {:.2f},{:.2f})", from, target, camYaw,
                   g_input.x, g_input.y);
 }
@@ -141,16 +193,26 @@ void OnDirectionalDoubleTap(RE::NiPoint2 a_dir)
     g_hasForcedDirection = true;
 }
 
-// A dodge press while the player's dodge plays (1.2.0, bChainStepToRoll): a step, once fChainWindowStart of it has
-// played, becomes a roll in the newly pressed direction - turn, then the forward roll (graph event SDGChainRoll). Once per
-// chain: a chained roll, or a roll, chains to nothing. A press before the window is dropped, not held for it.
+// A dodge press while the player's dodge plays (1.2.0, bChainStepToRoll), in three stages (the owner, round 3: "a step
+// dodge, then a short roll, then a long roll"): a step, once fChainWindowStart of it has played, becomes the standard
+// roll in the newly pressed direction; that roll, past the same share of it, becomes the long roll; the long roll chains
+// to nothing. Each stage once, each charged. A dodge that began as a roll does not chain. A press before the window is
+// dropped, not held for it. Turn, then the forward roll (graph event SDGChainRoll, a self-transition the selector
+// re-reads iStep on).
 static bool TryChain(RE::Actor* a_actor)
 {
     using Clock = CurrentDodge::Clock;
     const float played = std::chrono::duration<float>(Clock::now() - g_cur.start).count();
-    if (!g_cur.step || g_cur.chained)
+    if (g_cur.chainStage >= 2 || (!g_cur.step && g_cur.chainStage == 0))
     {
-        logger::debug("Chain: refused - {}", g_cur.chained ? "already chained once" : "a roll does not chain");
+        logger::debug("Chain: refused - {}", g_cur.chainStage >= 2 ? "the long roll ends the chain" : "a roll does not chain");
+        return false;
+    }
+    const int stage = g_cur.chainStage + 1;   // 1 short roll, 2 long roll
+    int ready = 0;
+    if (stage == 2 && !(a_actor->GetGraphVariableInt("iSDGLongRoll", ready) && ready == 1))
+    {
+        logger::debug("Chain: refused - this behaviour has no long roll (first person, or Pandora not run again)");
         return false;
     }
     if (played < Config::Settings::chain_window_start.GetValue() * g_cur.duration)
@@ -167,7 +229,7 @@ static bool TryChain(RE::Actor* a_actor)
     std::string ev;
     if (GetDodgeEvent(ev) == DodgeEventResult::kForwardBlocked)
         return false;
-    const int iStep = RollStep(a_actor);
+    const int iStep = stage == 1 ? 0 : 4;
     a_actor->SetGraphVariableInt("iStep", iStep);
     TurnForRoll(a_actor);
     float iFrames = std::clamp(Config::Settings::i_frame_duration.GetValue(), 0.0f, 3.0f);
@@ -189,8 +251,10 @@ static bool TryChain(RE::Actor* a_actor)
     g_cur.chargedAt = Clock::now();
     g_cur.step = false;
     g_cur.chained = true;
+    g_cur.chainStage = stage;
     g_cur.start = Clock::now();
-    logger::debug("Chain: step -> {} (iStep {})", iStep == 4 ? "long roll" : "roll", iStep);
+    g_cur.duration = 0.866667f;   // the forward roll's clip (short and long)
+    logger::debug("Chain: {} -> {} (iStep {})", stage == 1 ? "step" : "roll", iStep == 4 ? "long roll" : "roll", iStep);
     return true;
 }
 
@@ -201,6 +265,7 @@ bool ChargeOnDodgeStart()
 
 void Update(RE::Actor* a_actor)
 {
+    KeepRollYaw();
     if (!buffer.can_fire())
         return;
 
@@ -811,6 +876,7 @@ bool DoDodge(RE::Actor* a_actor)
         g_cur.active   = true;
         g_cur.step     = iStep == 2;
         g_cur.chained  = false;
+        g_cur.chainStage = 0;
         g_cur.start    = CurrentDodge::Clock::now();
         g_cur.duration = iStep == 2 ? StepDuration(dodge_event) : 1.0f;
     }

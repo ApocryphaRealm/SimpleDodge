@@ -5,6 +5,7 @@
 #include "InputEvents.h"
 #include "Settings.h"
 #include "ui.h"
+#include "dodging.h"
 
 #include "utils/AddressLibraryGuard.h"
 #include "utils/Logger.h"
@@ -19,6 +20,9 @@ namespace
 			logger::debug("kInputLoaded: registering the dodge key listener");
 			Events::InputEvent::GetSingleton()->RegisterInput();
 			Events::MenuEvent::GetSingleton()->RegisterMenus();
+			break;
+		case SKSE::MessagingInterface::kPostLoad:
+			Dodge::InitTDM();
 			break;
 		case SKSE::MessagingInterface::kDataLoaded:
 			logger::debug("kDataLoaded: animation-event sink, forms, strings, settings page");
