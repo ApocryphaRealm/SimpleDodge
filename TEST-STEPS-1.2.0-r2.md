@@ -1,6 +1,6 @@
 # Simple Dodge 1.2.0 (round 2) - in-game test steps
 
-Package: `D:\Claude output\7. current test builds\Skyrim - Simple Dodge\Simple Dodge 1.2.0` (repackaged; includes the
+Package: `D:\Claude output\7. current test builds\Skyrim - Simple Dodge\Simple Dodge 1.2.0` (repackaged after the round-2 crash: the six state machines are back to NO_TRANSITION and the hands sit on pole shafts; includes the
 step-to-roll chain, rolls turned to the stick, the input-buffer fix and the bow note). Round 1 result: batch
 B-20261112-181917-d389.
 
@@ -15,6 +15,10 @@ B-20261112-181917-d389.
      (`--auto_run --auto_close`). The output mod is **Pandora Output**.
    - Check: the Pandora log lists "Simple Dodge", and `Pandora Output\meshes\actors\character\behaviors\1hm_behavior.hkx`
      contains "SDGChainRoll" (the new event).
+   - Also check (round 2 was BLOCKED on this - batch B-20261112-200853-f998): Pandora's Engine.log has NO line
+     "ERROR : Packfile > ... FAILED" and none with "Enum dose not contain"; the 1hm_behavior, mt_behavior and
+     magicbehavior .hkx in Pandora Output contain "SimpleDodgeState" and "StepDodge". pandora-run fails on such lines.
+     If any is missing, stop before launching - the behaviour patch was dropped.
 4. `uLogLevel = 1`. Watch `Simple Dodge.log` live.
 5. **Notes for whoever runs it:**
    - Raise CarryWeight (`player.modav carryweight 1000`) BEFORE adding test weapons, or every press is refused as
