@@ -3,6 +3,7 @@
 ## 1.2.0 - 2026-11-12 - untested
 
 ### Added
+- Dodge while sprinting (on by default; bDodgeWhileSprinting, a Nexus request): dodge from a sprint, and out of a sprint attack the same way other attacks can be dodged out of (bEnableDodgeAttackCancel, bUseMCORecoverWindow). Before, a dodge while sprinting was refused; turn the setting off for that.
 - Step dodges for Animated Armoury weapons, picked by the weapon's keyword: halberds, pikes and spears, quarterstaves, rapiers, katanas and claws each hold their weapon through all eight directions, the way Animated Armoury's own stance holds it, so the weapon does not turn when the dodge starts or ends. Each set only plays when Animated Armoury is installed. Heavy Armory weapons and weapons tagged by Object Categorization Framework (such as Spear of Skyrim's spears) use the set of their weapon type - battleaxe, greatsword or one-handed - which holds them as that weapon type's stance does.
 - Installer page Compatibility: Bow Rapid Combo V3 keeps its own bow dodges by default (its back, left and right flips); choose 'Use Simple Dodge's bow steps over Bow Rapid Combo V3' to get Simple Dodge's bow steps in every direction.
 - Chain a step into a roll (off by default; bChainStepToRoll, fChainWindowStart): press dodge again once the step has played past the window (40% by default) and it becomes a roll in the newly pressed direction, charged like any dodge. Once per chain - a roll never chains, a press before the window does nothing. Needs Nemesis or Pandora run again.

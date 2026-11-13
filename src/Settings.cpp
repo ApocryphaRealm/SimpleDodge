@@ -90,7 +90,7 @@ namespace Config
 			a_fn(S::use_perk_lock); a_fn(S::use_percentage_cost); a_fn(S::remove_forward); a_fn(S::eight_way);
 			a_fn(S::directional_double_tap); a_fn(S::long_roll); a_fn(S::dodge_when_sheathed);
 			a_fn(S::no_stamina_regen_during_dodge); a_fn(S::dodge_sound); a_fn(S::menu_exit_grace);
-			a_fn(S::chain_step_to_roll); a_fn(S::chain_window_start);
+			a_fn(S::chain_step_to_roll); a_fn(S::chain_window_start); a_fn(S::dodge_while_sprinting);
 			a_fn(S::dodge_perk_ID); a_fn(S::on_dodge_spell_ID); a_fn(S::on_dodge_spell_perk_ID); a_fn(S::dodge_sound_ID);
 			a_fn(S::log_level);
 		}

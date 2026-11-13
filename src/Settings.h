@@ -76,6 +76,9 @@ namespace Config
 		// Chain a step dodge into a roll (1.2.0, the owner 2026-11-12): a dodge press during a step dodge, once
 		// fChainWindowStart of the step has played, rolls in the newly pressed direction. Once per chain.
 		inline static Value<bool>        chain_step_to_roll{ "Settings", "bChainStepToRoll", false };
+		// Dodge while sprinting, and out of a sprint attack (1.2.0, a Nexus request, 2026-11-13). On by default: before,
+		// a dodge while sprinting was refused ("Actor is sprinting"). Off brings that back.
+		inline static Value<bool>        dodge_while_sprinting{ "Settings", "bDodgeWhileSprinting", true };
 		inline static Value<float>       chain_window_start{ "Settings", "fChainWindowStart", 0.40F };
 		// How long after a menu CLOSES a dodge key press is ignored, in seconds.
 		//

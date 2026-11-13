@@ -538,7 +538,7 @@ DodgeResult IsInAttackState(const RE::Actor* a_actor)
 
 DodgeResult IsSprinting(const RE::Actor* a_actor)
 {
-    if (!a_actor->AsActorState()->IsSprinting())
+    if (Config::Settings::dodge_while_sprinting.GetValue() || !a_actor->AsActorState()->IsSprinting())
     {
         return DodgeResult::kSuccess;
     }
@@ -793,7 +793,19 @@ bool DoDodge(RE::Actor* a_actor)
 
     a_actor->SetGraphVariableFloat("TKDR_IframeDuration",
                                    iFrames); // Set invulnerable frame duration
-    const bool sent = a_actor->NotifyAnimationGraph(dodge_event);
+    const bool sprinting = a_actor->AsActorState()->IsSprinting();
+    bool sent = a_actor->NotifyAnimationGraph(dodge_event);
+    if (sprinting)
+    {
+        // bDodgeWhileSprinting (1.2.0): if the sprint state takes no dodge event, leave the sprint first and try once more
+        const bool retried = !sent;
+        if (retried)
+        {
+            a_actor->NotifyAnimationGraph("SprintStop");
+            sent = a_actor->NotifyAnimationGraph(dodge_event);
+        }
+        logger::debug("Dodge: out of a sprint{} - {}", retried ? " (SprintStop sent first)" : "", sent ? "dodged" : "the graph took no dodge");
+    }
     if (sent && Compat::IsPlayer(a_actor))
     {
         g_cur.active   = true;

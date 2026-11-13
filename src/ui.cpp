@@ -257,6 +257,8 @@ namespace Menu
 			"Press dodge again during a step dodge to roll in the new direction. Once per chain; the roll costs stamina too. Needs Nemesis or Pandora run again.");
 		Slider("SDG_ChainWindow", "Chain window start", S::chain_window_start, 0.0F, 1.0F, "%.2f", 0.05F, "SDG_HelpChainWindow",
 			"How much of the step must have played before a press chains into a roll (0.40 = 40%). An earlier press does nothing.");
+		Switch("SDG_Sprint", "Dodge while sprinting", S::dodge_while_sprinting, "SDG_HelpSprint",
+			"Dodge while you sprint, and out of a sprint attack. Off: stop sprinting before you can dodge.");
 		Switch("SDG_Sound", "Dodge sound", S::dodge_sound, "SDG_HelpSound",
 			"A short whoosh when your dodge starts. The sound is set in the INI (sDodgeSoundID).");
 		Switch("SDG_NoThird", "Only in first person", S::disable_in_third, "SDG_HelpNoThird", "Turns dodging off in third person.");
