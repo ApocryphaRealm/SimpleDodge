@@ -21,9 +21,6 @@ namespace
 			Events::InputEvent::GetSingleton()->RegisterInput();
 			Events::MenuEvent::GetSingleton()->RegisterMenus();
 			break;
-		case SKSE::MessagingInterface::kPostLoad:
-			Dodge::InitTDM();
-			break;
 		case SKSE::MessagingInterface::kDataLoaded:
 			logger::debug("kDataLoaded: animation-event sink, forms, strings, settings page");
 			animEventHandler::RegisterForPlayer();

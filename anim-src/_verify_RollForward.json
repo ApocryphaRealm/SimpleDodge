@@ -18,11 +18,11 @@
    ],
    [
     0.1333,
-    "animmotion 0 38.1847 0"
+    "animmotion 0 38.185 0"
    ],
    [
     0.2333,
-    "animmotion 0 90.7585 0"
+    "animmotion 0 90.758 0"
    ],
    [
     0.3667,
@@ -77,10 +77,10 @@
   "duration": 0.8667,
   "frames": 27,
   "fps": 30.0,
-  "tracks": 97,
+  "tracks": 99,
   "blend_hint": 0,
   "skeleton_name": "NPC Root [Root]",
-  "binding": 0,
+  "binding": 99,
   "annotations": [
    [
     0.0,
@@ -92,11 +92,11 @@
    ],
    [
     0.1333,
-    "animmotion 0 38.1847 0"
+    "animmotion 0 38.185 0"
    ],
    [
     0.2333,
-    "animmotion 0 90.7585 0"
+    "animmotion 0 90.758 0"
    ],
    [
     0.3667,
@@ -125,52 +125,22 @@
   ],
   "animated_bones": [
    "NPC COM [COM ]",
-   "NPC Pelvis [Pelv]",
    "NPC L Thigh [LThg]",
    "NPC L Calf [LClf]",
    "NPC L Foot [Lft ]",
    "NPC R Thigh [RThg]",
    "NPC R Calf [RClf]",
    "NPC R Foot [Rft ]",
-   "SkirtRBone01",
-   "SkirtRBone02",
-   "SkirtRBone03",
-   "SkirtLBone01",
-   "SkirtLBone02",
-   "SkirtLBone03",
-   "SkirtBBone01",
-   "SkirtBBone02",
-   "SkirtBBone03",
-   "SkirtFBone01",
-   "SkirtFBone02",
-   "SkirtFBone03",
    "NPC Spine [Spn0]",
    "NPC Spine1 [Spn1]",
    "NPC Spine2 [Spn2]",
-   "NPC L Clavicle [LClv]",
    "NPC L UpperArm [LUar]",
    "NPC L Forearm [LLar]",
-   "NPC R Clavicle [RClv]",
    "NPC R UpperArm [RUar]",
    "NPC R Forearm [RLar]",
-   "AnimObjectA",
    "NPC Neck [Neck]",
    "NPC Head [Head]",
-   "NPCEyeBone",
-   "NPC L Hand [LHnd]",
-   "NPC R Hand [RHnd]",
-   "NPC L Pauldron",
-   "NPC R Pauldron",
-   "MagicEffectsNode",
-   "NPC L Toe0 [LToe]",
-   "NPC L ForearmTwist1 [LLt1]",
-   "NPC L ForearmTwist2 [LLt2]",
-   "NPC L UpperarmTwist1 [LUt1]",
-   "NPC L UpperarmTwist2 [LUt2]",
-   "NPC R ForearmTwist1 [RLt1]",
-   "NPC R ForearmTwist2 [RLt2]",
-   "NPC R UpperarmTwist1 [RUt1]",
-   "NPC R UpperarmTwist2 [RUt2]"
+   "NPC R Toe0 [RToe]"
   ],
   "translating_bones": [
    "NPC COM [COM ]"
@@ -179,7 +149,7 @@
  },
  "reimport": {
   "result": "set()",
-  "action": "sneakrun_forwardroll",
+  "action": "RollForward",
   "frame_range": [
    1.0,
    27.0
@@ -195,11 +165,11 @@
    ],
    [
     5,
-    "animmotion 0 38.1847 0"
+    "animmotion 0 38.185 0"
    ],
    [
     8,
-    "animmotion 0 90.7585 0"
+    "animmotion 0 90.758 0"
    ],
    [
     12,

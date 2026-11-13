@@ -3,7 +3,7 @@
 			<hkparam name="userData">0</hkparam>
 			<hkparam name="name">SimpleDodgeForwardRight_ManualSelectorGenerator</hkparam>
 			<hkparam name="generators" numelements="6">
-				#sdge$36 #sdge$36 #sdge$76 #sdge$76 #sdge$101 #sdge$101
+				#sdge$105 #sdge$105 #sdge$76 #sdge$76 #sdge$106 #sdge$106
 			</hkparam>
 			<hkparam name="selectedGeneratorIndex">0</hkparam>
 			<hkparam name="currentGeneratorIndex">0</hkparam>

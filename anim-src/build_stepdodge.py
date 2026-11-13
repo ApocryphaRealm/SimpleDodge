@@ -721,6 +721,48 @@ for _n in ("ForwardRight", "BackLeft"):
 for _d in (LEFT, RIGHT, ROLL_LEFT, ROLL_RIGHT):
     _d.foot_yaw = {"L": 0.0, "R": 0.0}
 import copy
+# ---- 8 directional rolls (the owner, 2026-11-13: "go with the multiple roll dodge animations route, but I want them to
+# all be the forward dodge animation, just in a different direction") ------------------------------------------------
+# Each is the forward roll, solved as it is, with the whole body (every bone below NPC Root) turned about the root to the
+# travel direction: the turn eases in over YAW_IN frames at the start and back out over YAW_OUT at the end, so the
+# character ends facing where it faced before (a target lock keeps working). The root travels in that direction:
+# motion data and annotations are the forward roll's, turned. LongRoll<Dir> is the same at LONG_ROLL_SCALE of the
+# travel, solved with that travel so the landing plants fit it. Written to rolls\Roll<Dir>.hkx / rolls\LongRoll<Dir>.hkx.
+import math as _m
+ROLL_DIRS = {"Forward": (0.0, 1.0), "Back": (0.0, -1.0), "Left": (-1.0, 0.0), "Right": (1.0, 0.0),
+             "ForwardLeft": (-0.7071, 0.7071), "ForwardRight": (0.7071, 0.7071),
+             "BackLeft": (-0.7071, -0.7071), "BackRight": (0.7071, -0.7071)}
+LONG_ROLL_SCALE = 1.5
+YAW_IN, YAW_OUT = 4, 6
+def _turn(x, y, ux, uy):   # the rotation about Z that takes forward (0, 1) to (ux, uy)
+    return x * uy + y * ux, -x * ux + y * uy
+os.makedirs(os.path.join(OUT, "rolls"), exist_ok=True)
+for _dir, (_ux, _uy) in ROLL_DIRS.items():
+    for _long in (False, True):
+        _k = 1.5 if _long else 1.0
+        _src = Roll("RollForward", "pitch", +1, forward_roll_keys())
+        # the forward roll's keys INCLUDING the end one (0.8667 > the 0.866667 duration, so SPEC's motion drops it)
+        _src.motion = [(min(t_, _src.duration), x_ * _k, y_ * _k) for t_, x_, y_ in ROLL_ANN["RollForward"][2]]
+        _src.T = _src.root(_src.nf - 1)
+        _src.yaw = _m.atan2(-_ux, _uy)                      # sin = -ux, cos = uy
+        _src.preview_motion = [(t_,) + _turn(x_, y_, _ux, _uy) for t_, x_, y_ in _src.motion]
+        _src.ann = [(round(t_, 4), "animmotion %s %s 0" % tuple(_g(round(v_, 3)) for v_ in _turn(x_, y_, _ux, _uy)))
+                    for t_, x_, y_ in _src.motion]
+        _src.name = ("LongRoll" if _long else "Roll") + _dir
+        _src.file = os.path.join("rolls", _src.name)
+        DESIGNS[_src.name] = _src
+
+def roll_yaw(D, f):
+    """The body's turn at frame f for a directional roll: eased in and out, held between."""
+    if not hasattr(D, "yaw"): return 0.0
+    n = D.nf - 1
+    if f < YAW_IN: s = f / YAW_IN
+    elif f > n - YAW_OUT: s = (n - f) / YAW_OUT
+    else: s = 1.0
+    s = s * s * (3 - 2 * s)
+    return D.yaw * s
+
+os.makedirs(os.path.join(OUT, "unarmed", "rolls"), exist_ok=True)
 os.makedirs(os.path.join(OUT, "unarmed"), exist_ok=True)
 for _k in list(DESIGNS):
     _u = copy.copy(DESIGNS[_k]); _u.unarmed = True
@@ -1128,7 +1170,7 @@ def build(D):
     # the root path from the motion data, on an empty the armature rides (preview only - not part of the clip)
     mr = bpy.data.objects.new("MotionData_Root (preview travel)", None); sc.collection.objects.link(mr)
     bpy.context.preferences.edit.keyframe_new_interpolation_type = 'LINEAR'     # motion data is read linearly
-    for t, x, y in D.motion:
+    for t, x, y in getattr(D, "preview_motion", D.motion):
         mr.location = (x, y, 0); mr.keyframe_insert("location", frame=1 + t * FPS)
     arma.parent = mr
     action = bpy.data.actions.new(f"StepDodge{D.name}")
@@ -1146,6 +1188,10 @@ def build(D):
     reach_log = []
     for f in range(NF):
         G, reach, feet = solve_pose(D, f)
+        if hasattr(D, "yaw"):                    # a directional roll: the whole body turned about the root
+            Rz = Matrix.Rotation(roll_yaw(D, f), 4, 'Z'); r0 = IDX["NPC Root [Root]"]
+            G = [g_ if i_ == r0 else Rz @ g_ for i_, g_ in enumerate(G)] if isinstance(G, list) else \
+                {i_: (g_ if i_ == r0 else Rz @ g_) for i_, g_ in G.items()}
         reach_log.append({k_: round(v, 3) for k_, v in reach.items()})
         M = {i: G[i] @ Cfix[i] for i in Cfix}
         for pb in arma.pose.bones:

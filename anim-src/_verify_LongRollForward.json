@@ -1,0 +1,207 @@
+{
+ "ours": {
+  "duration": 0.8667,
+  "frames": 27,
+  "fps": 30.0,
+  "tracks": 99,
+  "blend_hint": 0,
+  "skeleton_name": "NPC Root [Root]",
+  "binding": 99,
+  "annotations": [
+   [
+    0.0,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.0667,
+    "animmotion 0 19.444 0"
+   ],
+   [
+    0.1333,
+    "animmotion 0 57.277 0"
+   ],
+   [
+    0.2333,
+    "animmotion 0 136.138 0"
+   ],
+   [
+    0.3667,
+    "animmotion 0 267.943 0"
+   ],
+   [
+    0.5333,
+    "animmotion 0 437.909 0"
+   ],
+   [
+    0.6333,
+    "animmotion 0 522.828 0"
+   ],
+   [
+    0.7,
+    "animmotion 0 565.403 0"
+   ],
+   [
+    0.7667,
+    "animmotion 0 592.813 0"
+   ],
+   [
+    0.8667,
+    "animmotion 0 613.925 0"
+   ]
+  ],
+  "animated_bones": [
+   "NPC COM [COM ]",
+   "NPC L Thigh [LThg]",
+   "NPC L Calf [LClf]",
+   "NPC L Foot [Lft ]",
+   "NPC R Thigh [RThg]",
+   "NPC R Calf [RClf]",
+   "NPC R Foot [Rft ]",
+   "NPC Spine [Spn0]",
+   "NPC Spine1 [Spn1]",
+   "NPC Spine2 [Spn2]",
+   "NPC L UpperArm [LUar]",
+   "NPC L Forearm [LLar]",
+   "NPC R UpperArm [RUar]",
+   "NPC R Forearm [RLar]",
+   "NPC Neck [Neck]",
+   "NPC Head [Head]",
+   "NPC R Toe0 [RToe]"
+  ],
+  "translating_bones": [
+   "NPC COM [COM ]"
+  ],
+  "root_track_static": true
+ },
+ "reference": {
+  "duration": 0.8667,
+  "frames": 27,
+  "fps": 30.0,
+  "tracks": 99,
+  "blend_hint": 0,
+  "skeleton_name": "NPC Root [Root]",
+  "binding": 99,
+  "annotations": [
+   [
+    0.0,
+    "animmotion 0 0 0"
+   ],
+   [
+    0.0667,
+    "animmotion 0 19.444 0"
+   ],
+   [
+    0.1333,
+    "animmotion 0 57.277 0"
+   ],
+   [
+    0.2333,
+    "animmotion 0 136.138 0"
+   ],
+   [
+    0.3667,
+    "animmotion 0 267.943 0"
+   ],
+   [
+    0.5333,
+    "animmotion 0 437.909 0"
+   ],
+   [
+    0.6333,
+    "animmotion 0 522.828 0"
+   ],
+   [
+    0.7,
+    "animmotion 0 565.403 0"
+   ],
+   [
+    0.7667,
+    "animmotion 0 592.813 0"
+   ],
+   [
+    0.8667,
+    "animmotion 0 613.925 0"
+   ]
+  ],
+  "animated_bones": [
+   "NPC COM [COM ]",
+   "NPC L Thigh [LThg]",
+   "NPC L Calf [LClf]",
+   "NPC L Foot [Lft ]",
+   "NPC R Thigh [RThg]",
+   "NPC R Calf [RClf]",
+   "NPC R Foot [Rft ]",
+   "NPC Spine [Spn0]",
+   "NPC Spine1 [Spn1]",
+   "NPC Spine2 [Spn2]",
+   "NPC L UpperArm [LUar]",
+   "NPC L Forearm [LLar]",
+   "NPC R UpperArm [RUar]",
+   "NPC R Forearm [RLar]",
+   "NPC Neck [Neck]",
+   "NPC Head [Head]",
+   "NPC R Toe0 [RToe]"
+  ],
+  "translating_bones": [
+   "NPC COM [COM ]"
+  ],
+  "root_track_static": true
+ },
+ "reimport": {
+  "result": "set()",
+  "action": "LongRollForward",
+  "frame_range": [
+   1.0,
+   27.0
+  ],
+  "markers": [
+   [
+    1,
+    "animmotion 0 0 0"
+   ],
+   [
+    3,
+    "animmotion 0 19.444 0"
+   ],
+   [
+    5,
+    "animmotion 0 57.277 0"
+   ],
+   [
+    8,
+    "animmotion 0 136.138 0"
+   ],
+   [
+    12,
+    "animmotion 0 267.943 0"
+   ],
+   [
+    17,
+    "animmotion 0 437.909 0"
+   ],
+   [
+    20,
+    "animmotion 0 522.828 0"
+   ],
+   [
+    22,
+    "animmotion 0 565.403 0"
+   ],
+   [
+    24,
+    "animmotion 0 592.813 0"
+   ],
+   [
+    27,
+    "animmotion 0 613.925 0"
+   ]
+  ],
+  "armature_bones": 99,
+  "bones_match_skeleton": true,
+  "hkx_bone_list_matches_skeleton_order": true,
+  "max_joint_error_units": 0.0354
+ },
+ "track_count_equals_skeleton": true,
+ "annotations_match_reference": true,
+ "duration_matches_motion_data": true
+}

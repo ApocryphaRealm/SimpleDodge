@@ -39,6 +39,7 @@ SHORT_ANIM = os.path.join(SHORT, "Meshes", "Actors", "Character", "animations")
 FP_ANIM = os.path.join(DIST, "Meshes", "Actors", "Character", "_1stperson", "animations")
 SHORT_FP_ANIM = os.path.join(SHORT, "Meshes", "Actors", "Character", "_1stperson", "animations")
 FORWARD, BACK, SIDE = 0.7, 0.6, 0.8
+ROLL_SHORT = 0.7   # the standard roll under Shorter: the forward factor, since every roll is the forward roll
 # roll file, its standard motion entry, its long motion entry, the axis it travels on
 ROLLS = {"Left": ("dodgeleft.hkx", "sdge$2", "sdge$10", 0), "Right": ("dodgeright.hkx", "sdge$3", "sdge$11", 0),
          "Back": ("dodgeback.hkx", "sdge$1", "sdge$9", 1), "Forward": ("sneakrun_forwardroll.hkx", "sdge$0", "sdge$8", 1)}
@@ -67,49 +68,8 @@ def shorter(x, y, z):
 
 def main():
     report = []
-    # 1 and 2, in the base folder and in every Open Animation Replacer set that has its own rolls (Unarmed): the set's
-    # long roll is its own roll scaled, at the same path below the set (TKDodge\LongRoll<Dir>.hkx), so OAR swaps it too
-    folders = [ANIM] + sorted({os.path.dirname(p) for p in glob.glob(os.path.join(ANIM, "OpenAnimationReplacer", "**",
-                                                                                   "dodgeleft.hkx"), recursive=True)})
-    for fo in folders:
-        tag = os.path.relpath(fo, ANIM)
-        for d, (f, std, lng, axis) in ROLLS.items():
-            p = os.path.join(fo, f)
-            if not os.path.isfile(p):
-                continue
-            dur, end = motion(std)
-            k = scale_axis(p, p, axis, end[axis], dur)
-            report.append("roll %-7s %s\\%s scaled x%.4f -> %.1f" % (d, tag, f, k, end[axis]))
-            dur, end = motion(lng)
-            k = scale_axis(p, os.path.join(fo, "TKDodge", "LongRoll%s.hkx" % d), axis, end[axis], dur)
-            report.append("long roll %-7s %s\\TKDodge\\LongRoll%s.hkx x%.4f -> %.1f" % (d, tag, d, k, end[axis]))
-    vanilla = {d: "Animations\\%s" % n for d, n in (("Left", "DodgeLeft.hkx"), ("Right", "DodgeRight.hkx"),
-                                                    ("Back", "DodgeBack.hkx"), ("Forward", "SneakRun_ForwardRoll.hkx"))}
-    changed = 0
-    for g in GRAPHS:
-        for p in glob.glob(os.path.join(SDGE, g, "*.txt")):
-            t = open(p, "rb").read().decode("utf-8")
-            m = re.search(r'<hkparam name="name">TKDodgeLongRoll(\w+)</hkparam>', t)
-            if not m:
-                continue
-            d = m.group(1)
-            new = 'name="animationName">Animations\\TKDodge\\LongRoll%s.hkx<' % d
-            t2 = re.sub(r'name="animationName">[^<]*<', lambda _: new, t, count=1)
-            if t2 != t:
-                open(p, "wb").write(t2.encode("utf-8")); changed += 1
-    report.append("long roll clip generators repointed: %d" % changed)
-    for ch in ("defaultmale", "defaultfemale"):
-        p = os.path.join(SDGE, ch, "#0029.txt")
-        t = open(p, "rb").read().decode("utf-8")
-        nl = "\r\n" if "\r\n" in t else "\n"
-        anchor = "\t\t\t\t<hkcstring>Animations\\TKDodge\\StepDodgeBackRight.hkx</hkcstring>" + nl
-        assert anchor in t, p
-        add = "".join("\t\t\t\t<hkcstring>Animations\\TKDodge\\LongRoll%s.hkx</hkcstring>%s" % (d, nl)
-                      for d in ("Forward", "Back", "Left", "Right") if "LongRoll%s.hkx" % d not in t)
-        if add:
-            t = t.replace(anchor, anchor + add, 1)
-            open(p, "wb").write(t.encode("utf-8"))
-        report.append("%s: long roll files listed" % ch)
+    # 1 and 2 (rolls and long rolls) are gone since the eight directional rolls (2026-11-13): build_stepdodge.py writes
+    # each Roll<Dir> / LongRoll<Dir> clip with annotations equal to its motion data (tools/patch_roll8.py).
     # 3. Shorter clips
     if os.path.isdir(os.path.join(SHORT, "Meshes")):
         shutil.rmtree(os.path.join(SHORT, "Meshes"))
@@ -118,8 +78,11 @@ def main():
         rel = os.path.relpath(p, ANIM)
         base = os.path.basename(p).lower()
         if base.startswith("longroll"):
+            continue                       # the long roll keeps its length under Shorter
+        if base.startswith("roll"):        # every roll is the forward roll turned: one factor in every direction
+            CM.rewrite(p, os.path.join(SHORT_ANIM, rel), lambda x, y, z: (x * ROLL_SHORT, y * ROLL_SHORT, z)); n += 1
             continue
-        if not (base.startswith("stepdodge") or base in [v[0] for v in ROLLS.values()]):
+        if not base.startswith("stepdodge"):
             raise SystemExit("unknown clip %s - decide whether Shorter scales it" % rel)
         CM.rewrite(p, os.path.join(SHORT_ANIM, rel), shorter); n += 1
     for p in glob.glob(os.path.join(FP_ANIM, "**", "*.hkx"), recursive=True):   # the first-person diagonals

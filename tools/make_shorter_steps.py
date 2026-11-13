@@ -30,8 +30,11 @@ REPO = os.path.dirname(HERE)
 SRC = os.path.join(REPO, "dist", "Nemesis_Engine", "mod", "sdge", "animationdatasinglefile")
 DST = os.path.join(REPO, "fomod-options", "Step-Shorter", "Nemesis_Engine", "mod", "sdge", "animationdatasinglefile")
 FORWARD, BACK, SIDE = 0.7, 0.6, 0.8
-ENTRIES = {"DefaultMale~1": ["sdge$%d" % n for n in range(0, 8)],
-           "DefaultFemale~1": ["sdge$%d" % n for n in range(0, 8)],
+ROLLS = {"sdge$%d" % n for n in range(12, 20)}
+# sdge$12..19: the eight standard rolls (2026-11-13; every one the forward roll turned) - x0.7 on both axes, the forward
+# factor, so a roll goes as far in every direction. The long rolls (sdge$8..11, 20..23) keep their length.
+ENTRIES = {"DefaultMale~1": ["sdge$%d" % n for n in list(range(0, 8)) + list(range(12, 20))],
+           "DefaultFemale~1": ["sdge$%d" % n for n in list(range(0, 8)) + list(range(12, 20))],
            "FirstPerson~1": ["346", "347", "348", "791"] + ["sdge$%d" % n for n in range(0, 4)]}
 
 
@@ -56,7 +59,10 @@ def main():
             last = None
             for k in range(3, 3 + count):
                 t, x, y, z = lines[k].split(" ")
-                out.append(" ".join((t, scale(x, SIDE), scale(y, FORWARD if float(y) > 0 else BACK), z)))
+                if n in ROLLS:
+                    out.append(" ".join((t, scale(x, FORWARD), scale(y, FORWARD), z)))
+                else:
+                    out.append(" ".join((t, scale(x, SIDE), scale(y, FORWARD if float(y) > 0 else BACK), z)))
                 last = out[-1]
             out += lines[3 + count:]
             open(os.path.join(DST, project, name), "wb").write(nl.join(out).encode("ascii"))

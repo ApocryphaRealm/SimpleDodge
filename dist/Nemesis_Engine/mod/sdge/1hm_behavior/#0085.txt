@@ -477,6 +477,13 @@
 				<hkcstring>TKDodgeBackLeft</hkcstring>
 				<hkcstring>TKDodgeBackRight</hkcstring>
 				<hkcstring>SDGChainRoll</hkcstring>
+				<hkcstring>SDGChainRollBack</hkcstring>
+				<hkcstring>SDGChainRollLeft</hkcstring>
+				<hkcstring>SDGChainRollRight</hkcstring>
+				<hkcstring>SDGChainRollForwardLeft</hkcstring>
+				<hkcstring>SDGChainRollForwardRight</hkcstring>
+				<hkcstring>SDGChainRollBackLeft</hkcstring>
+				<hkcstring>SDGChainRollBackRight</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="attributeNames" numelements="0"></hkparam>

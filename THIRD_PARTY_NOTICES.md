@@ -13,7 +13,6 @@ Simple Dodge is based on TK Dodge AIO / TK Dodge RE Addon by Styyx and on TK Dod
 | DevBench API (alandtse) | `include/DevBench` | MIT (`include/DevBench/DevBenchAPI.LICENSE.txt`) |
 | SKSE Menu Framework API header | `include/SKSEMenuFramework.h`, answered by the Apocrypha Menu Framework | see header |
 | Perk Entry Point Extender API (NoahBoddie) | `src/API/PerkEntryPointExtenderAPI.h` | see header |
-| True Directional Movement API (ersh1) | `src/API/TrueDirectionalMovementAPI.h` | GPL-3.0 (True Directional Movement); one change: GetModuleHandleA |
 
 ## Bundled game assets
 

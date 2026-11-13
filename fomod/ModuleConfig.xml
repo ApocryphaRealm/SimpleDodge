@@ -51,17 +51,17 @@
 			<optionalFileGroups order="Explicit">
 				<group name="Step distance" type="SelectExactlyOne">
 					<plugins order="Explicit">
-						<plugin name="Normal">
-							<description>Step dodges travel their full distance: forward about 409 units, back 300, to the side about 251.</description>
+						<plugin name="Shorter (recommended)">
+							<description>Recommended. Step dodges cover a realistic distance: forward about 287 units (70%), back 180 (60%), to the side about 201 (80%), the diagonals by the same mix. The standard roll is shorter too (70%); the long roll keeps its full length. Run Nemesis or Pandora after installing.</description>
+							<files>
+								<folder source="Step-Shorter" destination="" priority="1" />
+							</files>
 							<typeDescriptor>
 								<type name="Recommended" />
 							</typeDescriptor>
 						</plugin>
-						<plugin name="Shorter">
-							<description>Shorter step dodges: forward 70% (about 287 units), back 60% (180), to the side 80% (about 201); the diagonals by the same mix. The standard roll uses the same distances, so it is shorter too; the long roll is not changed. Run Nemesis or Pandora after installing.</description>
-							<files>
-								<folder source="Step-Shorter" destination="" priority="1" />
-							</files>
+						<plugin name="Normal">
+							<description>Step dodges travel their full distance: forward about 409 units, back 300, to the side about 251. The standard roll goes about 409 in every direction.</description>
 							<typeDescriptor>
 								<type name="Optional" />
 							</typeDescriptor>

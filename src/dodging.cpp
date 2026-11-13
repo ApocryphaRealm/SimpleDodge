@@ -4,7 +4,6 @@
 
 #include "API/PerkEntryPointExtenderAPI.h"
 #include "RollHeading.h"
-#include "API/TrueDirectionalMovementAPI.h"
 #include "Settings.h"
 #include "Utility.h"
 #include "mod-data.h"
@@ -44,76 +43,10 @@ static float StepDuration(const std::string& a_event)
     return 0.7f;   // Left, Right, ForwardLeft, BackRight
 }
 
-// Every roll is the forward roll, the body turned first to where the stick points (1.2.0, item 9). The input is
-// camera-relative: the camera's yaw is the player's heading, plus the third-person orbit offset while free rotation is
-// on (weapon sheathed). Dodge in place (no input) rolls straight ahead, no turn.
-// True Directional Movement turns a target-locked player back to the target every frame, so a roll turned to the stick
-// went toward the enemy whatever the stick said (the owner, round 3, 2026-11-13). TDM's API hands out control of the
-// player's yaw (RequestYawControl / SetPlayerYaw / ReleaseYawControl, speed multiplier 0 = instant): the roll holds it
-// for its length and gives it back, so TDM resumes facing the target once the roll is over. Main thread only.
-static TDM_API::IVTDM2* g_tdm = nullptr;
-static bool g_tdmYaw = false;
-static float g_tdmYawTarget = 0.0f;
-static std::chrono::steady_clock::time_point g_tdmYawUntil{};
-
-void InitTDM()
-{
-    g_tdm = reinterpret_cast<TDM_API::IVTDM2*>(TDM_API::RequestPluginAPI(TDM_API::InterfaceVersion::V2));
-    logger::info("True Directional Movement API: {}", g_tdm ? "found - rolls take its yaw control while they play" :
-                                                              "not loaded (rolls turn the player directly)");
-}
-
-static void HoldRollYaw(float a_yaw, float a_seconds)
-{
-    if (!g_tdm)
-        return;
-    const auto handle = SKSE::GetPluginHandle();
-    const auto res = g_tdmYaw ? TDM_API::APIResult::AlreadyGiven : g_tdm->RequestYawControl(handle, 0.0f);
-    if (res != TDM_API::APIResult::OK && res != TDM_API::APIResult::AlreadyGiven)
-    {
-        logger::debug("Roll: True Directional Movement kept its yaw control (result {})", static_cast<int>(res));
-        return;
-    }
-    g_tdmYaw = true;
-    g_tdmYawTarget = a_yaw;
-    g_tdmYawUntil = std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(a_seconds * 1000));
-    g_tdm->SetPlayerYaw(handle, a_yaw);
-}
-
-static void KeepRollYaw()
-{
-    if (!g_tdmYaw || !g_tdm)
-        return;
-    const auto handle = SKSE::GetPluginHandle();
-    if (std::chrono::steady_clock::now() < g_tdmYawUntil)
-    {
-        g_tdm->SetPlayerYaw(handle, g_tdmYawTarget);
-        return;
-    }
-    g_tdm->ReleaseYawControl(handle);
-    g_tdmYaw = false;
-    logger::debug("Roll: yaw control given back to True Directional Movement");
-}
-
-static void TurnForRoll(RE::Actor* a_actor)
-{
-    if (!a_actor || !g_hasInput)
-        return;
-    float camYaw = a_actor->data.angle.z;
-    if (auto* cam = RE::PlayerCamera::GetSingleton(); cam && cam->IsInThirdPerson() && cam->currentState)
-    {
-        auto* tps = static_cast<RE::ThirdPersonState*>(cam->currentState.get());
-        if (tps && tps->freeRotationEnabled)
-            camYaw += tps->freeRotation.x;
-    }
-    const float from = a_actor->data.angle.z;
-    const float target = RollHeading::Target(camYaw, g_input.x, g_input.y);
-    a_actor->SetHeading(target);
-    if (Compat::IsPlayer(a_actor))
-        HoldRollYaw(target, 1.0f);   // the roll clips are 0.7-0.87 s
-    logger::debug("Roll: turned from {:.2f} to {:.2f} (camera {:.2f}, input {:.2f},{:.2f})", from, target, camYaw,
-                  g_input.x, g_input.y);
-}
+// Rolls (1.2.0, the owner, 2026-11-13): eight directional roll clips - the forward roll turned to each direction
+// and back (anim-src rolls\Roll<Dir>.hkx) - played by the direction's own event, like the steps. The earlier
+// forward-roll turn (item 9) and its True Directional Movement yaw control are gone: under a target lock TDM kept
+// the player facing the target, so every roll went toward it.
 
 static int RollStep(RE::Actor* a_actor)
 {
@@ -231,10 +164,13 @@ static bool TryChain(RE::Actor* a_actor)
         return false;
     const int iStep = stage == 1 ? 0 : 4;
     a_actor->SetGraphVariableInt("iStep", iStep);
-    TurnForRoll(a_actor);
     float iFrames = std::clamp(Config::Settings::i_frame_duration.GetValue(), 0.0f, 3.0f);
     a_actor->SetGraphVariableFloat("TKDR_IframeDuration", iFrames);
-    if (!a_actor->NotifyAnimationGraph("SDGChainRoll"))
+    // the pressed direction's own chain event (SDGChainRoll<Dir>; forward is SDGChainRoll). A graph without the
+    // directional ones (first person) takes the forward one.
+    const std::string dir = ev.rfind("TKDodge", 0) == 0 ? ev.substr(7) : std::string();
+    const std::string chainEvent = (dir.empty() || dir == "Forward") ? std::string("SDGChainRoll") : "SDGChainRoll" + dir;
+    if (!a_actor->NotifyAnimationGraph(chainEvent) && (chainEvent == "SDGChainRoll" || !a_actor->NotifyAnimationGraph("SDGChainRoll")))
     {
         static bool warned = false;
         if (!warned)
@@ -254,7 +190,7 @@ static bool TryChain(RE::Actor* a_actor)
     g_cur.chainStage = stage;
     g_cur.start = Clock::now();
     g_cur.duration = 0.866667f;   // the forward roll's clip (short and long)
-    logger::debug("Chain: {} -> {} (iStep {})", stage == 1 ? "step" : "roll", iStep == 4 ? "long roll" : "roll", iStep);
+    logger::debug("Chain: {} -> {} (iStep {}) {}", stage == 1 ? "step" : "roll", iStep == 4 ? "long roll" : "roll", iStep, chainEvent);
     return true;
 }
 
@@ -265,7 +201,6 @@ bool ChargeOnDodgeStart()
 
 void Update(RE::Actor* a_actor)
 {
-    KeepRollYaw();
     if (!buffer.can_fire())
         return;
 
@@ -840,9 +775,6 @@ bool DoDodge(RE::Actor* a_actor)
                              "run Nemesis or Pandora again with Simple Dodge ticked. Using the standard roll.");
             }
         }
-        // item 9: every roll is the forward roll, the body turned to the stick direction first
-        TurnForRoll(a_actor);
-        dodge_event = "TKDodgeForward";
     }
     a_actor->SetGraphVariableInt("iStep", iStep);
     logger::debug("Dodge: {} (iStep {}) {}", iStep == 2 ? "step" : (iStep == 4 ? "long roll" : "roll"), iStep, dodge_event);
@@ -878,7 +810,7 @@ bool DoDodge(RE::Actor* a_actor)
         g_cur.chained  = false;
         g_cur.chainStage = 0;
         g_cur.start    = CurrentDodge::Clock::now();
-        g_cur.duration = iStep == 2 ? StepDuration(dodge_event) : 1.0f;
+        g_cur.duration = iStep == 2 ? StepDuration(dodge_event) : 0.866667f;   // every roll clip is the forward roll's length
     }
     return sent;
 }

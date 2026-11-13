@@ -185,7 +185,6 @@ void OnDirectionalDoubleTap(RE::NiPoint2 a_dir);
 void Update(RE::Actor* a_actor);                       // Called in the player update loop
 bool CanDodge(RE::Actor* a_actor);                     // main decider if dodge is allowed
 bool DoDodge(RE::Actor* a_actor);                      // do dodge
-void InitTDM();                                        // True Directional Movement's API, if it is loaded
 void ClearBuffer();                                    // clear input buffer. used if a menu is open
 DodgeResult PerkCheck(const RE::Actor* a_actor);       // check if perk exists and the actor has the perk
 DodgeResult IsDodging(const RE::Actor* a_actor);       // check if actor is already dodging

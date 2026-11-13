@@ -1,7 +1,7 @@
 {
  "ours": {
-  "duration": 0.7,
-  "frames": 22,
+  "duration": 0.8667,
+  "frames": 27,
   "fps": 30.0,
   "tracks": 99,
   "blend_hint": 0,
@@ -13,35 +13,46 @@
     "animmotion 0 0 0"
    ],
    [
-    0.0333,
-    "animmotion -5.33511 0 0"
+    0.0667,
+    "animmotion -12.963 0 0"
    ],
    [
-    0.1,
-    "animmotion -28.8548 0 0"
+    0.1333,
+    "animmotion -38.185 0 0"
    ],
    [
-    0.2,
-    "animmotion -68.0616 0 0"
+    0.2333,
+    "animmotion -90.758 0 0"
    ],
    [
-    0.3333,
-    "animmotion -111.319 0 0"
+    0.3667,
+    "animmotion -178.629 0 0"
    ],
    [
     0.5333,
-    "animmotion -179.919 0 0"
+    "animmotion -291.939 0 0"
    ],
    [
-    0.6,
-    "animmotion -199.692 0 0"
+    0.6333,
+    "animmotion -348.552 0 0"
    ],
    [
-    0.6667,
-    "animmotion -210.336 0 0"
+    0.7,
+    "animmotion -376.935 0 0"
+   ],
+   [
+    0.7667,
+    "animmotion -395.209 0 0"
+   ],
+   [
+    0.8667,
+    "animmotion -409.283 0 0"
    ]
   ],
   "animated_bones": [
+   "x_NPC LookNode [Look]",
+   "x_NPC Translate [Pos ]",
+   "x_NPC Rotate [Rot ]",
    "NPC COM [COM ]",
    "NPC L Thigh [LThg]",
    "NPC L Calf [LClf]",
@@ -56,57 +67,77 @@
    "NPC L Forearm [LLar]",
    "NPC R UpperArm [RUar]",
    "NPC R Forearm [RLar]",
+   "AnimObjectA",
+   "AnimObjectB",
    "NPC Neck [Neck]",
-   "NPC Head [Head]"
+   "NPC Head [Head]",
+   "NPC R Toe0 [RToe]",
+   "Camera3rd [Cam3]",
+   "Camera Control"
   ],
   "translating_bones": [
-   "NPC COM [COM ]"
+   "x_NPC Translate [Pos ]",
+   "x_NPC Rotate [Rot ]",
+   "NPC COM [COM ]",
+   "AnimObjectA",
+   "AnimObjectB"
   ],
   "root_track_static": true
  },
  "reference": {
-  "duration": 0.7,
-  "frames": 21,
-  "fps": 28.571,
+  "duration": 0.8667,
+  "frames": 27,
+  "fps": 30.0,
   "tracks": 99,
   "blend_hint": 0,
   "skeleton_name": "NPC Root [Root]",
-  "binding": 0,
+  "binding": 99,
   "annotations": [
    [
     0.0,
     "animmotion 0 0 0"
    ],
    [
-    0.0333,
-    "animmotion -5.33511 0 0"
+    0.0667,
+    "animmotion -12.963 0 0"
    ],
    [
-    0.1,
-    "animmotion -28.8548 0 0"
+    0.1333,
+    "animmotion -38.185 0 0"
    ],
    [
-    0.2,
-    "animmotion -68.0616 0 0"
+    0.2333,
+    "animmotion -90.758 0 0"
    ],
    [
-    0.3333,
-    "animmotion -111.319 0 0"
+    0.3667,
+    "animmotion -178.629 0 0"
    ],
    [
     0.5333,
-    "animmotion -179.919 0 0"
+    "animmotion -291.939 0 0"
    ],
    [
-    0.6,
-    "animmotion -199.692 0 0"
+    0.6333,
+    "animmotion -348.552 0 0"
    ],
    [
-    0.6667,
-    "animmotion -210.336 0 0"
+    0.7,
+    "animmotion -376.935 0 0"
+   ],
+   [
+    0.7667,
+    "animmotion -395.209 0 0"
+   ],
+   [
+    0.8667,
+    "animmotion -409.283 0 0"
    ]
   ],
   "animated_bones": [
+   "x_NPC LookNode [Look]",
+   "x_NPC Translate [Pos ]",
+   "x_NPC Rotate [Rot ]",
    "NPC COM [COM ]",
    "NPC L Thigh [LThg]",
    "NPC L Calf [LClf]",
@@ -117,32 +148,33 @@
    "NPC Spine [Spn0]",
    "NPC Spine1 [Spn1]",
    "NPC Spine2 [Spn2]",
-   "NPC L Clavicle [LClv]",
    "NPC L UpperArm [LUar]",
    "NPC L Forearm [LLar]",
-   "NPC R Clavicle [RClv]",
    "NPC R UpperArm [RUar]",
    "NPC R Forearm [RLar]",
+   "AnimObjectA",
+   "AnimObjectB",
    "NPC Neck [Neck]",
    "NPC Head [Head]",
-   "NPC L Hand [LHnd]",
-   "NPC R Hand [RHnd]",
-   "NPC L Toe0 [LToe]",
    "NPC R Toe0 [RToe]",
-   "Camera3rd [Cam3]"
+   "Camera3rd [Cam3]",
+   "Camera Control"
   ],
   "translating_bones": [
+   "x_NPC Translate [Pos ]",
+   "x_NPC Rotate [Rot ]",
    "NPC COM [COM ]",
-   "Camera3rd [Cam3]"
+   "AnimObjectA",
+   "AnimObjectB"
   ],
   "root_track_static": true
  },
  "reimport": {
   "result": "set()",
-  "action": "dodgeleft",
+  "action": "RollLeft",
   "frame_range": [
    1.0,
-   22.0
+   27.0
   ],
   "markers": [
    [
@@ -150,38 +182,46 @@
     "animmotion 0 0 0"
    ],
    [
-    2,
-    "animmotion -5.33511 0 0"
+    3,
+    "animmotion -12.963 0 0"
    ],
    [
-    4,
-    "animmotion -28.8548 0 0"
+    5,
+    "animmotion -38.185 0 0"
    ],
    [
-    7,
-    "animmotion -68.0616 0 0"
+    8,
+    "animmotion -90.758 0 0"
    ],
    [
-    11,
-    "animmotion -111.319 0 0"
+    12,
+    "animmotion -178.629 0 0"
    ],
    [
     17,
-    "animmotion -179.919 0 0"
+    "animmotion -291.939 0 0"
    ],
    [
-    19,
-    "animmotion -199.692 0 0"
+    20,
+    "animmotion -348.552 0 0"
    ],
    [
-    21,
-    "animmotion -210.336 0 0"
+    22,
+    "animmotion -376.935 0 0"
+   ],
+   [
+    24,
+    "animmotion -395.209 0 0"
+   ],
+   [
+    27,
+    "animmotion -409.283 0 0"
    ]
   ],
   "armature_bones": 99,
   "bones_match_skeleton": true,
   "hkx_bone_list_matches_skeleton_order": true,
-  "max_joint_error_units": 0.04
+  "max_joint_error_units": 75.1614
  },
  "track_count_equals_skeleton": true,
  "annotations_match_reference": true,
