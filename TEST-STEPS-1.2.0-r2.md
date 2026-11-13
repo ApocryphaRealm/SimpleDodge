@@ -69,6 +69,30 @@ Setup: `bStepDodge = true`, `bChainStepToRoll = true`, `fChainWindowStart = 0.40
 - **O2** Stamina at 0 (`player.damageav stamina 1000`), press 5 times. EXPECTED: one "Not enough stamina" line per press
   and one meter flash.
 
+### Weapon-type keyword sets (item 11) and the one-handed thigh check
+The profile has **Object Categorization Framework** enabled, and **Animated Armoury** and **Heavy Armory** are NOT
+installed. Do not add them to the owner's list.
+- **K1** After the game reaches the main menu, read Open Animation Replacer's log
+  (`Documents\My Games\Skyrim Special Edition\SKSE\OpenAnimationReplacer.log`; its UI is off, bEnableUI = false).
+  EXPECTED: all 25 Simple Dodge submods are listed:
+  - Unarmed 100;
+  - vanilla types 110-120;
+  - the 13 keyword sets 131-154.
+  The 9 Animated Armoury and Heavy Armory submods (131-136, 141-143) may be reported with an unresolved or invalid
+  keyword form (NewArmoury.esp is not loaded; the Heavy Armory keywords B07776-B07780 in Update.esm's range do not
+  exist). The 4 OCF submods (151-154) resolve, since OCF is loaded. No other Simple Dodge submod is reported, and no error
+  stops OAR from loading. Copy every line that names Simple Dodge.
+- **K2** With those submods present, re-check the vanilla-type sets: sword, greatsword, battleaxe, bow (both installer
+  choices as in B1/B2) and a spell, drawn, Left and Back. EXPECTED: each still plays its own weapon set, as in round 1.
+- **K3** (only if a weapon carrying an OCF polearm or katana keyword exists in the list - search with houseCARL for
+  WEAP records with OCF_WeapTypePole2H_Swing, Pole2H_Thrust, Quarterstaff2H or Katana1H) equip it and dodge in 4
+  directions. EXPECTED: the matching new set (halberd, pike, quarterstaff or katana grip) plays, not the vanilla-type
+  set. If no such weapon is in the list, say so.
+- **T1** Iron sword drawn (left hand empty), step dodge Forward-Right; save the frames around its landing (clip frame 11
+  of 22, about 0.35 s after the press). EXPECTED: the blade passes beside the right thigh, not through it. The
+  offline check measured 5.1 units between the blade axis and the thigh bone at that frame. If the blade visibly cuts
+  into the leg, say so with the frame.
+
 ### Sheathe after dodging
 - **H1** Raise carry weight. Equip an iron sword and an iron shield through the inventory menu (not EquipItemEx), draw,
   dodge 8 times, then press R. EXPECTED: the weapon sheathes.
