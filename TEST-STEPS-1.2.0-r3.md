@@ -75,6 +75,18 @@ Shorter, which changed only the motion data, changed nothing. Now:
   EXPECTED: the dodge cancels the attack's recovery.
 - bDodgeWhileSprinting = false: EXPECTED "Dodge failed because of: Actor is sprinting", once per press.
 
+### D1 - first-person diagonals (repo da68706; a Nexus request by 1m0ws)
+- First person, `bStepDodge = true`, `bEightWayDodge = true`, flat floor. For each of ForwardLeft, ForwardRight,
+  BackLeft, BackRight: once with a weapon drawn (iron sword), once sheathed (`bDodgeWhenSheathed = true`), once with a
+  spell drawn (Flames).
+  EXPECTED: log "8-way dodge: angle ... -> TKDodgeForwardLeft" (etc.) and the move goes DIAGONALLY - not straight forward
+  or back as before. Distance about the third-person diagonal's (forward diagonals about 320, back diagonals about 280,
+  plus the walk). The arms play a dodge (no T-pose, no frozen arms); save a frame at mid-dodge for each.
+- **D2** The same four diagonals (drawn only) after reinstalling with **Shorter** (P2a's launch). EXPECTED shorter, about
+  0.7-0.8 of D1's, in the same diagonal direction.
+- Pandora check (setup 2): the first-person 1hm_behavior, mt_behavior and magicbehavior .hkx hold
+  "TKDodgeForwardLeft", "TKDodgeForwardRight", "TKDodgeBackLeft", "TKDodgeBackRight" and "SimpleDodgeState".
+
 ### Regression (quick, AMR enabled, Normal)
 - **B1** Installer option "Use Simple Dodge's bow steps over Bow Rapid Combo V3": bow drawn, back step. EXPECTED
   grounded bow step, about 318 (+ walk).
