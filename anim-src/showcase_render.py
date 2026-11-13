@@ -3,6 +3,10 @@
 # root, written as PNG frames to _showcase\<Design>\ for make_showcase_gif. The owner, 2026-11-11: "Would it be possible
 # to play those GIFs with a loaded character's body with armor on?"
 # Run: blender --background --factory-startup --python showcase_render.py -- <Design> [<Design> ...]
+#      ... -- --follow --chain <Design> <Design> ...   (2026-11-13, the 1.2.0 page's step > short roll > long roll GIF):
+#      the designs play one after another as one continuous dodge - each clip's floor is shifted back by the travel of
+#      the clips before it, so the floor keeps sliding instead of jumping back at each cut. Frames go to
+#      _showcase_follow\Chain<i>_<Design>\ for make_page_gifs_120.py.
 import bpy, sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_stepdodge as B
@@ -52,6 +56,8 @@ def dress(arma):
             elif o.type == 'EMPTY' and not o.children: bpy.data.objects.remove(o)
     arma.data.pose_position = 'POSE'
 
+FLOOR_AT = None   # --chain: the floor's centre, set per clip (minus the travel so far)
+
 def stage(D, mr):
     sc = bpy.context.scene
     T = D.root(D.nf - 1)
@@ -62,11 +68,12 @@ def stage(D, mr):
     sc.render.image_settings.file_format = 'PNG'
     sc.view_settings.view_transform = 'AgX' if 'AgX' in [v.identifier for v in sc.view_settings.bl_rna.properties['view_transform'].enum_items] else 'Filmic'
     # floor: large plane, stone-grey with a faint checker so the travel reads
-    bpy.ops.mesh.primitive_plane_add(size=1, location=(T.x / 2, T.y / 2, 0)); fl = bpy.context.object
-    fl.scale = (1600, 1600, 1)
+    bpy.ops.mesh.primitive_plane_add(size=1, location=FLOOR_AT or (T.x / 2, T.y / 2, 0)); fl = bpy.context.object
+    size = 6000 if FLOOR_AT else 1600              # --chain: the shifted floor must still reach past the whole chain
+    fl.scale = (size, size, 1)
     m = bpy.data.materials.new("floor"); m.use_nodes = True; nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]; ch = nt.nodes.new("ShaderNodeTexChecker"); tc = nt.nodes.new("ShaderNodeTexCoord")
-    ch.inputs["Scale"].default_value = 64.0
+    ch.inputs["Scale"].default_value = 64.0 * size / 1600   # the same 25-unit squares at any floor size
     ch.inputs["Color1"].default_value = (0.20, 0.19, 0.18, 1); ch.inputs["Color2"].default_value = (0.25, 0.24, 0.22, 1)
     nt.links.new(tc.outputs["UV"], ch.inputs["Vector"]); nt.links.new(ch.outputs["Color"], bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = 0.85
@@ -113,13 +120,23 @@ def blank_check(png):
     if max(lum) - min(lum) < 0.05:
         raise SystemExit(f"BLANK FRAME {png}: one flat colour - check the camera's clip range and framing")
 
-def render(D):
-    bpy.ops.wm.open_mainfile(filepath=os.path.join(B.OUT, f"{D.file}.blend"))
+def render(D, tag=None, travel=None):
+    src = os.path.join(B.OUT, f"{D.file}.blend")
+    B.say("source", D.name, "<-", src)                  # which clip a GIF came from, in the log
+    print("SOURCE", D.name, src, flush=True)
+    bpy.ops.wm.open_mainfile(filepath=src)
     arma = bpy.data.objects["StepDodge_Skeleton"]; mr = arma.parent
+    sc = bpy.context.scene
+    if travel is not None:                             # --chain: this clip's own start and end, from the root itself
+        sc.frame_set(1); p0 = mr.matrix_world.translation.copy()
+        sc.frame_set(D.nf); p1 = mr.matrix_world.translation.copy()
+        global FLOOR_AT; FLOOR_AT = (p0.x - travel.x, p0.y - travel.y, 0)
+        travel.x += p1.x - p0.x; travel.y += p1.y - p0.y
+        print("CHAIN", D.name, "travel", tuple(round(v, 1) for v in (p1 - p0)), "floor at", FLOOR_AT, flush=True)
     dress(arma)
     stage(D, mr)
-    out = os.path.join(B.OUT, "_showcase_follow" if FOLLOW else "_showcase_top" if TOP else "_showcase", D.name); os.makedirs(out, exist_ok=True)
     sc = bpy.context.scene
+    out = os.path.join(B.OUT, "_showcase_follow" if FOLLOW else "_showcase_top" if TOP else "_showcase", tag or D.name); os.makedirs(out, exist_ok=True)
     for f in range(1, D.nf + 1):
         sc.frame_set(f); sc.render.filepath = os.path.join(out, f"{f:03d}.png")
         bpy.ops.render.render(write_still=True)
@@ -130,4 +147,9 @@ if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else ["Forward"]
     FOLLOW = "--follow" in args
     TOP = "--top" in args or FOLLOW
-    for k in [a for a in args if a not in ("--top", "--follow")]: render(B.DESIGNS[k])
+    names = [a for a in args if a not in ("--top", "--follow", "--chain")]
+    if "--chain" in args:
+        moved = Vector((0, 0, 0))
+        for i, k in enumerate(names): render(B.DESIGNS[k], f"Chain{i + 1}_{k}", moved)
+    else:
+        for k in names: render(B.DESIGNS[k])
