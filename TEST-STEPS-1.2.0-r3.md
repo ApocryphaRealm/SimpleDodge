@@ -67,13 +67,6 @@ Shorter, which changed only the motion data, changed nothing. Now:
   the landing (clip frame 11 of 22, about 0.35 s after the press). EXPECTED: the blade passes beside the right thigh,
   not through it (the offline check measured 5.1 units between the blade axis and the thigh bone at that frame).
 
-### W1 - spear keeps its direction (owner report, 2026-11-13)
-- A Spear of Skyrim spear (TwoHandAxe; OCF thrust keyword), drawn, third person, standing in its combat idle. Step dodge
-  Left, Right, Forward, Back; frames at the press, mid-step and the landing.
-  EXPECTED: the spear stays as the idle holds it (the battleaxe set now plays for it) - no turn of the weapon at the start
-  or end. Before: the Pike (OCF) set pointed it forward from the hip.
-- Same with a Lunar Armory spear (TwoHandSword type): the greatsword set, no turn.
-
 ### S1 - dodge while sprinting (bDodgeWhileSprinting = true, the default)
 - Sprint (hold the sprint key, or the dodge key if it is not the sprint key), then press dodge / double-tap a direction.
   EXPECTED: a dodge plays out of the sprint. Log "Dodge: out of a sprint - dodged" (or "(SprintStop sent first)"); no
