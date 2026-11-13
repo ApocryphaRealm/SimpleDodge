@@ -799,13 +799,13 @@ def grip_locals(spec):
 # and turns its +Y (every weapon mesh's long axis, measured from the nifs) along the pole, rolled by roll degrees.
 POLES = {
     # head up, haft nearly upright in front, right hand at the chest, left hand lower on the haft
-    "Halberd":  dict(grip=(5.0, 24.0, 96.0), dir=(0.10, 0.25, 1.0), spread=-24.0, roll=0.0),
+    "Halberd":  dict(grip=(4.0, 25.0, 96.0), dir=(0.10, 0.25, 1.0), spread=-14.0, roll=0.0),
     # held low at the right hip, point forward and up across the body, left hand forward on the shaft
-    "Pike":     dict(grip=(15.0, 14.0, 90.0), dir=(-0.15, 0.85, 0.45), spread=6.0, roll=0.0),
+    "Pike":     dict(grip=(15.0, 14.0, 90.0), dir=(-0.15, 0.85, 0.45), spread=14.0, roll=0.0),
     # across the body, rising to the left, hands about shoulder-width apart
-    "QtrStaff": dict(grip=(16.0, 18.0, 84.0), dir=(-0.85, 0.15, 0.50), spread=44.0, roll=0.0),
+    "QtrStaff": dict(grip=(13.0, 22.0, 96.0), dir=(-0.85, 0.25, 0.45), spread=44.0, roll=0.0),
     # blade forward at chest height, arm out; the left hand back at the hip
-    "Rapier":   dict(grip=(14.0, 34.0, 96.0), dir=(0.0, 1.0, 0.15), left=(-16.0, -6.0, 82.0), roll=90.0),
+    "Rapier":   dict(grip=(13.0, 26.0, 96.0), dir=(0.0, 1.0, 0.15), left=(-16.0, -6.0, 82.0), roll=90.0),
 }
 WEAPON_TYPE_GRIPS = {   # sets riding a vanilla idle (the game's own data)
     "Katana": {"R": ("2hm_idle", None, 0.0), "L": ("2hm_idle", None, 0.0)},     # two-handed, as the greatsword
@@ -824,16 +824,27 @@ def pole_frame(pg, Gch, G0ch):
     z = x.cross(y).normalized()
     return Matrix((x, y, z)).transposed()
 
-def pole_wrist_target(pg, side, Gch, G0ch):
-    """Wrist target (world) that puts that hand's palm node on the grip point / the shaft."""
+def pole_hand(pg, side, Gch, G0ch):
+    """(wrist target, hand world rotation) that close that hand ON the weapon (2026-11-12, the owner: "The hands dont
+    line up on the pike dodge or the qtr staff"). Each hand holds by its own grip node - the right hand's Weapon node,
+    the left hand's Shield node, at their skeleton offsets from the hand - so the hand is turned until that node's frame
+    is the weapon's (its +Y along the shaft; the left hand rolled left_roll degrees about the shaft), and the wrist goes
+    where that node then lands on the grip point / the shaft. Before, the arm reached the hand bone to a point offset by
+    the REST-pose palm vector and the hand kept the forearm's rotation, so the palm missed the shaft by up to 14 units
+    and the grip turned up to 88 degrees across it (check_grip_contact.py). None for a hand the weapon does not hold."""
+    if side == "L" and "left" in pg:
+        return Gch @ (G0ch.inverted() @ Vector(pg["left"])), None
+    node = "Weapon" if side == "R" else "Shield"
+    i = IDX[node]
+    Rnode = pole_frame(pg, Gch, G0ch)
+    if side == "L":
+        Rnode = Matrix.Rotation(radians(pg.get("left_roll", 0.0)), 3, Rnode.col[1]) @ Rnode
+    Rhand = Rnode @ L0[i].to_3x3().inverted()
     Rc = Gch.to_3x3() @ G0ch.to_3x3().inverted()
     grip = Gch @ (G0ch.inverted() @ Vector(pg["grip"]))
-    d = (Rc @ Vector(pg["dir"])).normalized()
-    if side == "R":
-        return grip + Rc @ (P0("NPC R Hand [RHnd]") - P0("Weapon"))
-    if "left" in pg:
-        return Gch @ (G0ch.inverted() @ Vector(pg["left"]))
-    return grip + d * pg["spread"] + Rc @ (P0("NPC L Hand [LHnd]") - P0("Shield"))
+    if side == "L":
+        grip = grip + (Rc @ Vector(pg["dir"])).normalized() * pg["spread"]
+    return grip - Rhand @ L0[i].translation, Rhand
 
 GRIPS.update(WEAPON_TYPE_GRIPS)
 for _set, _pg in POLES.items():
@@ -1070,8 +1081,9 @@ def _solve_pose(D, f, dz=0.0):
                 tgt_rest = base + Vector((D.v(pre + "_dx", f), D.v(pre + "_dy", f), D.v(pre + "_dz", f)))
                 tgt = G[ch] @ (G0[ch].inverted() @ tgt_rest)
                 pg = getattr(D, "pole", None)
+                hand_rot = None
                 if pg is not None:                     # our own pole / blade grip (2026-11-12, weapon-type sets)
-                    tgt = pole_wrist_target(pg, side, G[ch], G0[ch])
+                    tgt, hand_rot = pole_hand(pg, side, G[ch], G0[ch])
                 s = G[i].translation
                 s0, e0, w0 = P0(BN[ua]), P0(BN[fa]), P0(BN[ha])
                 l1, l2 = (e0 - s0).length, (w0 - e0).length
@@ -1084,6 +1096,8 @@ def _solve_pose(D, f, dz=0.0):
                 Rl = chain_rot((w0 - e0).normalized(), -(e0 - s0).normalized(), (wr - el).normalized(), -(el - s).normalized())
                 G[i] = Matrix.Translation(s) @ (Ru @ B0[ua]).to_4x4()
                 over[fa] = (el, Rl)
+                if hand_rot is not None:               # the hand turned onto the weapon; its wrist stays where IK put it
+                    over[ha] = (None, hand_rot @ B0[ha].transposed())
         if name == "Weapon" and getattr(D, "pole", None) is not None:
             G[i] = Matrix.Translation(G[i].translation) @ pole_frame(D.pole, G[IDX["NPC Spine2 [Spn2]"]], G0[IDX["NPC Spine2 [Spn2]"]]).to_4x4()
         # head level and facing forward: neck takes half of the chest's rotation back out, the head all of it

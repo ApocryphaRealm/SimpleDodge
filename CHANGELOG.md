@@ -13,6 +13,7 @@
 - Dodge with weapons sheathed (off by default; on the settings page, or bDodgeWhenSheathed in the INI). The behaviour patch now puts every dodge - step dodges, rolls, long rolls and diagonals - into the weapons-away animations too, in third and first person, and the open-hand unarmed set plays while weapons are sheathed. With it off, a dodge with weapons sheathed is refused at once, before any stamina is spent. Needs Nemesis or Pandora run again.
 
 ### Fixed
+- Pike, quarterstaff and halberd step dodges: both hands now close on the shaft in every frame of every direction (before, the left hand missed it by up to 14 units and both grips were turned across it).
 - A dodge refused for a reason that will not change in a moment (over carry weight, not enough stamina, no perk, weapon sheathed) is dropped at once instead of being retried and logged on every frame of the input buffer.
 - An NPC's dodge no longer takes stamina from the player: only the player's own dodge start charges the player's stamina.
 - fMenuExitGrace (how long a dodge press is ignored after a menu closes) is now read from and saved to the INI; it was always 0.25 s.
