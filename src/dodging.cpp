@@ -238,10 +238,21 @@ bool CanDodge(RE::Actor* a_actor)
         return true;
     }
     logger::debug("Dodge failed because of: {}", DodgeResultToString(result));
-    // Sheathed does not change within the buffer's window (drawing counts as sheathed until it ends): drop the press
-    // instead of re-checking - and re-logging - it every frame.
-    if (result == DodgeResult::kWeaponSheathed)
-        buffer.clear();
+    // A refusal that waiting out the buffer's 0.4 s will not fix drops the press instead of re-checking - and re-logging
+    // - it every frame: sheathed (drawing counts as sheathed until it ends), over carry weight, not enough stamina, no
+    // perk, no dodge behaviour. The 1.2.0 test logged 483 lines for about 20 presses while overencumbered.
+    switch (result)
+    {
+        case DodgeResult::kWeaponSheathed:
+        case DodgeResult::kOverencumbered:
+        case DodgeResult::kStamina:
+        case DodgeResult::kHasNoPerk:
+        case DodgeResult::kNoDodgeBehavior:
+            buffer.clear();
+            break;
+        default:
+            break;
+    }
 
     return false;
 }
