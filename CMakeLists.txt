@@ -10,7 +10,8 @@ project(
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+# IPO/LTCG off: with MSVC 14.52 (2026-11-12) /GL+/LTCG output is flagged by the Bitdefender engine family on VirusTotal (Gen:Variant.Ulise.617802) and Nexus quarantines it; IPO off scans clean
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 configure_file(
