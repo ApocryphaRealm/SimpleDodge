@@ -22,6 +22,7 @@ COMPATIBILITY
 - Improved Camera: works (reported by a player, 2026-11-12).
 - Animated Armoury, Heavy Armory and other OCF-tagged weapons: halberds and glaives, pikes, spears and tridents, quarterstaves, rapiers, katanas and claws get step dodges holding that weapon, picked by the weapon's keyword (Open Animation Replacer). Each mod's set only plays when that mod is installed. Without those mods nothing changes. No files from those mods are included.
 - Bow Rapid Combo V3 (Archer Combat Overhaul): its own bow dodges win by default - with a bow drawn its back, left and right flips play (its OAR submod 'Base 2', priority 9901001); forward and the diagonals are Simple Dodge's bow step. To use Simple Dodge's bow steps in every direction instead, pick 'Use Simple Dodge's bow steps over Bow Rapid Combo V3' on the installer's Compatibility page (it adds an OAR user.json raising Simple Dodge's Bow set to 9901700).
+- Dodge animation packs with a pause at the end of the forward dodge (such as Dynamic Dodge Animation): tick 'Forward dodge scurry fix' in the installer (off by default). Forward dodges then play to the same end point as back dodges (0.08 s before the clip ends instead of 0.3 s), so running does not start while the forward dodge is still finishing. Run Pandora or Nemesis again after changing it.
 - Other dodge mods: use Simple Dodge instead of TK Dodge RE, TK Dodge NG or TK Dodge AIO, not beside them - two would fire every dodge twice. Untick TK Dodge's own behaviour patch in Pandora or Nemesis and run it again.
 
 INSTALL

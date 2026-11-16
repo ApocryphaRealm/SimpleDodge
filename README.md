@@ -21,6 +21,10 @@ Clone with `git clone --recursive` (or run `git submodule update --init`) for `e
 - SE / AE: `configure.bat`, then `build.bat` - output in `build/relwithdebinfo-se-only/SimpleDodge.dll`
 - Skyrim 1.7.x: `configure17.bat`, then `build17.bat` - output in `build/relwithdebinfo-17/SimpleDodge.dll`
 
+Installer options live in `fomod/` (the installer) and `fomod-options/<Option>/` (their files). `Forward-Scurry-Fix`
+is written by `tools/make_forward_scurry_fix.py`: copies of the forward step and roll trigger arrays with TKDodgeStop at
+-0.080 s instead of -0.300 s, nothing else changed.
+
 The game files (behaviour patch, animations, plugin, translations, INI) are in `dist/`. Animation sources and the
 Blender build scripts are in `anim-src/`.
 

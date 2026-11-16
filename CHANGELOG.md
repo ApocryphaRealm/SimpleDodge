@@ -1,5 +1,10 @@
 # Changelog - Simple Dodge
 
+## 1.4.0 - 2026-11-16 - untested
+
+### Added
+- Installer option 'Forward dodge scurry fix' (off by default, like TK Dodge RE's option of that name): forward dodges - the forward step and the forward rolls - play to the same end point as back dodges, handing over to running 0.08 s before the clip ends instead of 0.3 s. For dodge animation mods with a pause at the end of the forward dodge, such as Dynamic Dodge Animation, which otherwise start running while the dodge is still finishing. The back-diagonal rolls share the forward rolls' timing in the behaviour, so they hand over at 0.08 s too with the option on. Third person; first person was already even. Run Pandora or Nemesis again after changing it.
+
 ## 1.3.0 - 2026-11-13 - working
 
 ### Changed

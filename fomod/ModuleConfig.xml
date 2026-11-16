@@ -70,6 +70,23 @@
 				</group>
 			</optionalFileGroups>
 		</installStep>
+		<installStep name="Forward dodge scurry fix">
+			<optionalFileGroups order="Explicit">
+				<group name="Forward dodge scurry fix" type="SelectAny">
+					<plugins order="Explicit">
+						<plugin name="Forward dodge scurry fix">
+							<description>Off by default. Makes forward dodges play to the same end point as back dodges (0.08 s before the clip ends, instead of 0.3 s), for dodge animation mods with a pause at the end, such as Dynamic Dodge Animation - without it, running can start while the forward dodge is still finishing. Re-run Pandora or Nemesis after changing it.</description>
+							<files>
+								<folder source="Forward-Scurry-Fix" destination="" priority="1" />
+							</files>
+							<typeDescriptor>
+								<type name="Optional" />
+							</typeDescriptor>
+						</plugin>
+					</plugins>
+				</group>
+			</optionalFileGroups>
+		</installStep>
 		<installStep name="Compatibility">
 			<optionalFileGroups order="Explicit">
 				<group name="Bow Rapid Combo V3 (Archer Combat Overhaul)" type="SelectExactlyOne">
