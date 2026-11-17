@@ -208,6 +208,8 @@
 				<hkcstring>bIframeActive</hkcstring>
 				<hkcstring>bInIframe</hkcstring>
 				<hkcstring>bIsDodging</hkcstring>
+				<hkcstring>SDG_DodgeSpeed</hkcstring>
+				<hkcstring>SDG_DodgeSpeedFwdStep</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="characterPropertyNames" numelements="7">

@@ -1035,6 +1035,8 @@
 				<hkcstring>TKDR_IframeDuration</hkcstring>
 				<hkcstring>TDM_TargetLock</hkcstring>
 				<hkcstring>iSDGLongRoll</hkcstring>
+				<hkcstring>SDG_DodgeSpeed</hkcstring>
+				<hkcstring>SDG_DodgeSpeedFwdStep</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="characterPropertyNames" numelements="2">

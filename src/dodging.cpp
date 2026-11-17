@@ -48,6 +48,34 @@ static float StepDuration(const std::string& a_event)
 // forward-roll turn (item 9) and its True Directional Movement yaw control are gone: under a target lock TDM kept
 // the player facing the target, so every roll went toward it.
 
+// Dodge speed (1.4.0, fDodgeSpeed): every dodge clip's playbackSpeed is bound to SDG_DodgeSpeed, the forward step's
+// (which the patch plays at 0.9) to SDG_DodgeSpeedFwdStep. A clip's motion is read by its own time, so a faster clip
+// travels the same distance sooner; its triggers are in clip time too. What runs on the clock instead - the i-frame
+// timer (graph time) and this file's clip lengths - is divided by the speed the graph actually took. A graph generated
+// before 1.4.0 has no such variable: the clips keep their speed and nothing is divided (said once in the log).
+constexpr float kMinDodgeSpeed = 0.5f;
+constexpr float kMaxDodgeSpeed = 2.0f;
+constexpr float kForwardStepPlayback = 0.9f;   // the forward step clip's own playbackSpeed in the behaviour patch
+
+static float ApplyDodgeSpeed(RE::Actor* a_actor)
+{
+    const float speed = std::clamp(Config::Settings::dodge_speed.GetValue(), kMinDodgeSpeed, kMaxDodgeSpeed);
+    const bool set = a_actor->SetGraphVariableFloat("SDG_DodgeSpeed", speed);
+    a_actor->SetGraphVariableFloat("SDG_DodgeSpeedFwdStep", kForwardStepPlayback * speed);
+    if (!set)
+    {
+        static bool warned = false;
+        if (!warned && speed != 1.0f)
+        {
+            warned = true;
+            logger::warn("Dodge speed {:.2f}: this character's behaviour has no SDG_DodgeSpeed - run Nemesis or Pandora "
+                         "again with Simple Dodge ticked. Dodges play at their own speed.", speed);
+        }
+        return 1.0f;
+    }
+    return speed;
+}
+
 static int RollStep(RE::Actor* a_actor)
 {
     if (Config::Settings::long_roll.GetValue())
@@ -164,7 +192,8 @@ static bool TryChain(RE::Actor* a_actor)
         return false;
     const int iStep = stage == 1 ? 0 : 4;
     a_actor->SetGraphVariableInt("iStep", iStep);
-    float iFrames = std::clamp(Config::Settings::i_frame_duration.GetValue(), 0.0f, 3.0f);
+    const float speed = ApplyDodgeSpeed(a_actor);
+    float iFrames = std::clamp(Config::Settings::i_frame_duration.GetValue() / speed, 0.0f, 3.0f);
     a_actor->SetGraphVariableFloat("TKDR_IframeDuration", iFrames);
     // the pressed direction's own chain event (SDGChainRoll<Dir>; forward is SDGChainRoll). A graph without the
     // directional ones (first person) takes the forward one.
@@ -189,8 +218,9 @@ static bool TryChain(RE::Actor* a_actor)
     g_cur.chained = true;
     g_cur.chainStage = stage;
     g_cur.start = Clock::now();
-    g_cur.duration = 0.866667f;   // the forward roll's clip (short and long)
-    logger::debug("Chain: {} -> {} (iStep {}) {}", stage == 1 ? "step" : "roll", iStep == 4 ? "long roll" : "roll", iStep, chainEvent);
+    g_cur.duration = 0.866667f / speed;   // the forward roll's clip (short and long), at the dodge speed
+    logger::debug("Chain: {} -> {} (iStep {}) {}, speed {:.2f}", stage == 1 ? "step" : "roll", iStep == 4 ? "long roll" : "roll",
+                  iStep, chainEvent, speed);
     return true;
 }
 
@@ -786,7 +816,10 @@ bool DoDodge(RE::Actor* a_actor)
     if (PerkEntryPointsAvailable())
         RE::HandleEntryPoint(RE::PerkEntryPoint::kModPowerAttackStamina, a_actor, iFrames, MOD::IFRAME_DURATION_PERK, armo);
 
-    iFrames = std::clamp(iFrames, 0.0f, 3.0f);
+    // the i-frame timer runs on graph time: at a faster dodge it covers the same part of the motion in less time
+    const float speed = ApplyDodgeSpeed(a_actor);
+    iFrames = std::clamp(iFrames / speed, 0.0f, 3.0f);
+    logger::debug("Dodge speed {:.2f}: i-frames {:.3f} s", speed, iFrames);
 
     a_actor->SetGraphVariableFloat("TKDR_IframeDuration",
                                    iFrames); // Set invulnerable frame duration
@@ -810,7 +843,8 @@ bool DoDodge(RE::Actor* a_actor)
         g_cur.chained  = false;
         g_cur.chainStage = 0;
         g_cur.start    = CurrentDodge::Clock::now();
-        g_cur.duration = iStep == 2 ? StepDuration(dodge_event) : 0.866667f;   // every roll clip is the forward roll's length
+        // every roll clip is the forward roll's length; all of them run faster by the dodge speed
+        g_cur.duration = (iStep == 2 ? StepDuration(dodge_event) : 0.866667f) / speed;
     }
     return sent;
 }

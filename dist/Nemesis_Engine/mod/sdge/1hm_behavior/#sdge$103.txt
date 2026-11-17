@@ -1,5 +1,5 @@
 		<hkobject name="#sdge$103" class="hkbClipGenerator" signature="0x333b85b9">
-			<hkparam name="variableBindingSet">null</hkparam>
+			<hkparam name="variableBindingSet">#sdge$127</hkparam>
 			<hkparam name="userData">0</hkparam>
 			<hkparam name="name">TKDodgeRollForwardLeft</hkparam>
 			<hkparam name="animationName">Animations\TKDodge\RollForwardLeft.hkx</hkparam>

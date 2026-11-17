@@ -80,6 +80,11 @@ namespace Config
 		// a dodge while sprinting was refused ("Actor is sprinting"). Off brings that back.
 		inline static Value<bool>        dodge_while_sprinting{ "Settings", "bDodgeWhileSprinting", true };
 		inline static Value<float>       chain_window_start{ "Settings", "fChainWindowStart", 0.40F };
+		// Dodge speed (1.4.0, the owner, 2026-11-16: "speed them up over the same distance"): the playback speed of every
+		// dodge clip, through the behaviour variables SDG_DodgeSpeed / SDG_DodgeSpeedFwdStep (tools\patch_dodge_speed.py).
+		// The clips' motion is read by their own time, so the distance stays; the i-frame time and the DLL's own clip
+		// timings are divided by it. 1.0 = the animations' own speed.
+		inline static Value<float>       dodge_speed{ "Settings", "fDodgeSpeed", 1.0F };
 		// How long after a menu CLOSES a dodge key press is ignored, in seconds.
 		//
 		// The menu-open check is not enough on its own: the press that closes a menu is delivered to gameplay in the

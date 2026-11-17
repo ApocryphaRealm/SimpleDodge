@@ -234,6 +234,8 @@ namespace Menu
 		Switch("SDG_StepDodge", "Step dodge instead of roll", S::step_dodge, "SDG_HelpStepDodge", "Short sidesteps instead of rolls.");
 		Switch("SDG_LongRoll", "Long roll", S::long_roll, "SDG_HelpLongRoll",
 			"Rolls travel half as far again as a step dodge. Off: a roll goes as far as the step. Needs Nemesis or Pandora run again.");
+		Slider("SDG_DodgeSpeed", "Dodge speed", S::dodge_speed, 0.5F, 2.0F, "%.2fx", 0.05F, "SDG_HelpDodgeSpeed",
+			"How fast every dodge plays: 1.00 is the animations' own speed, 1.50 plays them in two thirds of the time. The same distance either way; the invincibility time shrinks or grows with it. Needs Nemesis or Pandora run again.");
 		Switch("SDG_InPlace", "Dodge while standing still", S::enable_dodge_in_place, "SDG_HelpInPlace", "Dodging with no direction held uses the default direction below.");
 		{
 			int current = 0;
